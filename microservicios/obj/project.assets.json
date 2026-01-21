@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Acer\\microservicios\\microservicios.csproj",
+      "projectUniqueName": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj",
       "projectName": "microservicios",
-      "projectPath": "C:\\Users\\Acer\\microservicios\\microservicios.csproj",
+      "projectPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj",
       "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Acer\\microservicios\\obj\\",
+      "outputPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Acer\\AppData\\Roaming\\NuGet\\NuGet.Config"
