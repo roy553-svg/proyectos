@@ -1,0 +1,15 @@
+C:\Users\Acer\Downloads\microservicioss\microservicios\bin\Debug\net10.0\microservicios.exe
+C:\Users\Acer\Downloads\microservicioss\microservicios\bin\Debug\net10.0\microservicios.deps.json
+C:\Users\Acer\Downloads\microservicioss\microservicios\bin\Debug\net10.0\microservicios.runtimeconfig.json
+C:\Users\Acer\Downloads\microservicioss\microservicios\bin\Debug\net10.0\microservicios.dll
+C:\Users\Acer\Downloads\microservicioss\microservicios\bin\Debug\net10.0\microservicios.pdb
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.AssemblyInfoInputs.cache
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.AssemblyInfo.cs
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.csproj.CoreCompileInputs.cache
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.sourcelink.json
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.dll
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\refint\microservicios.dll
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.pdb
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\microservicios.genruntimeconfig.cache
+C:\Users\Acer\Downloads\microservicioss\microservicios\obj\Debug\net10.0\ref\microservicios.dll

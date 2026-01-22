@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj": {}
+    "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj": {
+    "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj",
+        "projectUniqueName": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios.csproj",
         "projectName": "microservicios",
-        "projectPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\microservicios.csproj",
+        "projectPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios.csproj",
         "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\microservicios\\obj\\",
+        "outputPath": "C:\\Users\\Acer\\Downloads\\microservicioss\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Acer\\AppData\\Roaming\\NuGet\\NuGet.Config"
