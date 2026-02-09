@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/transaction.worker/">
+    <Project Path="transaction.worker/Transaction.worker.csproj" />
+  </Folder>
+  <Project Path="Transaction.Api/Transaction.Api.csproj" />
+</Solution>
