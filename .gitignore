@@ -1,6 +1,84 @@
+# Compiled files
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Visual Studio
+.vs/
+.vscode/
+*.sln.iml
+*.user
+*.userprefs
+*.ncb
+*.suo
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Visual Studio Code
+.vscode/
+launch.json
+settings.json
+*.code-workspace
+
+# ReSharper
+.idea/
+*.sln.iml
+_ReSharper*/
+*.resharper
+*.resharper.user
+
+# Local user-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test Results
+TestResults/
+[Tt]est[Rr]esult/
+[Bb]uild[Ll]og.*
+*.trx
+
+# Rider
+.idea/
+*.sln.iml
+*.suo
+*.user
+
+# Misc
+.DS_Store
+*.log
+*.stackdump
+Thumbs.db
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Artifacts
+artifacts/
+publish/
+
+# Desktop files
 **/desktop.ini
 **/NET.ini
-**/NET.ini
-**/NET.ini
-obj/Debug/net10.0/microservicios.AssemblyInfo.cs
-obj/Debug/net10.0/microservicios.AssemblyInfoInputs.cache
