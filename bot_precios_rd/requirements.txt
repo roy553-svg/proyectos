@@ -1,0 +1,8 @@
+# Bot de Precios RD — dependencias de producción (Python 3.9+)
+pyTelegramBotAPI==4.22.0     # API de Telegram (telebot)
+APScheduler==3.10.4          # Programación semanal con zona horaria America/Santo_Domingo
+requests==2.32.3             # Cliente HTTP para las APIs/catálogos de las tiendas
+beautifulsoup4==4.12.3       # Parseo de catálogos HTML (WooCommerce/Magento)
+lxml==5.2.2                  # Parser rápido opcional para BeautifulSoup
+python-dotenv==1.0.1         # Carga de variables desde el archivo .env
+tzdata==2024.1               # Base de zonas horarias (necesaria en Windows y Alpine)

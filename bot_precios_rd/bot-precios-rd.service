@@ -1,0 +1,23 @@
+# Servicio systemd para correr el bot 24/7 en un VPS Linux.
+# Instalación:
+#   sudo cp bot-precios-rd.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now bot-precios-rd
+#   journalctl -u bot-precios-rd -f      # ver los logs en vivo
+[Unit]
+Description=Bot de Precios RD (farmacias y canasta familiar)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/bot_precios_rd
+Environment=TZ=America/Santo_Domingo
+ExecStart=/home/ubuntu/bot_precios_rd/venv/bin/python -u /home/ubuntu/bot_precios_rd/bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
