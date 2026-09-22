@@ -1,0 +1,1033 @@
+-- =============================================================================
+--  BankLedger.daml
+--  Libro de transacciones institucional segregado sobre Canton Network.
+--
+--  Modelo de privacidad (need-to-know) aplicado por el lenguaje, no por ACLs:
+--    * Cada `InstitutionalAccount` y cada `TransactionRecord` tiene como UNICO
+--      signatario al banco propietario. Ningun otro participante de la red
+--      -ni siquiera un banco con el que se opera- puede leer esos contratos.
+--    * Una transferencia interbancaria produce una transaccion atomica cuyos
+--      nodos se reparten entre Alfa y Beta segun su interes legitimo:
+--      Beta jamas ve el saldo ni el asiento interno de Alfa (sub-transaction
+--      privacy), y viceversa. Solo el recibo bilateral es comun a ambos.
+--    * El regulador (Banco Central) se declara como `observer`: lectura total
+--      sobre lo que se le divulga, cero autoridad de ejecucion.
+--
+--  Nota de portabilidad: Daml 3.x (Daml-LF 2.1) NO soporta contract keys. Las
+--  referencias entre contratos son, por tanto, explicitas por `ContractId`.
+-- =============================================================================
+
+{-# LANGUAGE RecordWildCards #-}
+
+module BankLedger where
+
+import DA.Assert ((===))
+import DA.Optional (isNone)
+import DA.Time (addRelTime, minutes)
+import Daml.Script
+
+-- -----------------------------------------------------------------------------
+-- Tipos de dominio contable
+-- -----------------------------------------------------------------------------
+
+-- | Direccion contable del asiento en el libro del banco propietario.
+data EntryDirection
+  = DebitEntry   -- ^ Salida de fondos de la cuenta.
+  | CreditEntry  -- ^ Entrada de fondos a la cuenta.
+  deriving (Eq, Show, Ord)
+
+-- | Naturaleza economica del movimiento. Permite segregar el reporting
+--   regulatorio (por ejemplo, tesoreria vs. flujos de cliente).
+data EntryKind
+  = TreasuryMovement    -- ^ Movimiento interno de tesoreria.
+  | ClientMovement      -- ^ Movimiento por cuenta de un cliente.
+  | InterbankOutgoing   -- ^ Pata emisora de una liquidacion interbancaria.
+  | InterbankIncoming   -- ^ Pata receptora de una liquidacion interbancaria.
+  deriving (Eq, Show, Ord)
+
+-- | Resultado tipado de la liquidacion final. Los tres contratos nacen en UNA
+--   sola transaccion Canton: o existen todos, o no existe ninguno.
+data SettlementResult = SettlementResult
+  with
+    receiverAccount : ContractId InstitutionalAccount
+    receiverEntry   : ContractId TransactionRecord
+    receipt         : ContractId InterbankSettlementReceipt
+  deriving (Eq, Show)
+
+-- -----------------------------------------------------------------------------
+-- Licencia / onboarding institucional
+-- -----------------------------------------------------------------------------
+
+-- | Contrato de rol. Habilita a una institucion a abrir cuentas en su propio
+--   libro. Modela el onboarding del participante en la red Canton.
+template BankLicense
+  with
+    bank      : Party    -- ^ Identidad del participante bancario.
+    legalName : Text     -- ^ Razon social.
+    bic       : Text     -- ^ Codigo BIC/SWIFT.
+    auditors  : [Party]  -- ^ Reguladores con acceso de solo lectura.
+  where
+    signatory bank
+    observer auditors
+
+    nonconsuming choice OpenAccount : ContractId InstitutionalAccount
+      with
+        accountId      : Text
+        accountName    : Text
+        currency       : Text
+        openingBalance : Decimal
+      controller bank
+      do
+        assertMsg "El saldo de apertura no puede ser negativo"
+          (openingBalance >= 0.0)
+        create InstitutionalAccount with
+          bank = bank
+          accountId = accountId
+          accountName = accountName
+          currency = currency
+          balance = openingBalance
+          auditors = auditors
+
+-- -----------------------------------------------------------------------------
+-- Cuenta institucional (estado del libro local)
+-- -----------------------------------------------------------------------------
+
+-- | Saldo vivo de una cuenta del banco. Es el unico contrato mutable del
+--   modelo: cada movimiento lo archiva y crea su sucesor, dejando ademas un
+--   `TransactionRecord` inmutable como asiento.
+template InstitutionalAccount
+  with
+    bank        : Party
+    accountId   : Text
+    accountName : Text
+    currency    : Text
+    balance     : Decimal
+    auditors    : [Party]
+  where
+    -- Signatario unico: la segregacion del libro es estructural, no una ACL.
+    signatory bank
+    observer auditors
+
+    ensure balance >= 0.0 && accountId /= "" && currency /= ""
+
+    -- | Abono en el libro propio (movimiento interno o pata receptora).
+    choice PostCredit : (ContractId InstitutionalAccount, ContractId TransactionRecord)
+      with
+        entryId          : Text    -- ^ Clave de idempotencia del asiento.
+        amount           : Decimal
+        expectedCurrency : Text    -- ^ Divisa que el emisor del asiento espera.
+        kind             : EntryKind
+        counterparty     : Text
+        reference        : Text
+        postedAt         : Time
+      controller bank
+      do
+        assertMsg "El importe debe ser estrictamente positivo" (amount > 0.0)
+        assertMsg
+          ("Divisa incompatible: la cuenta es " <> currency
+            <> " y el asiento viene en " <> expectedCurrency)
+          (expectedCurrency == currency)
+        let newBalance = balance + amount
+        newAccount <- create this with balance = newBalance
+        entry <- create TransactionRecord with
+          bank = bank
+          accountId = accountId
+          entryId = entryId
+          direction = CreditEntry
+          kind = kind
+          amount = amount
+          currency = currency
+          counterparty = counterparty
+          reference = reference
+          postedAt = postedAt
+          balanceAfter = newBalance
+          auditors = auditors
+        pure (newAccount, entry)
+
+    -- | Cargo en el libro propio (movimiento interno o pata emisora).
+    choice PostDebit : (ContractId InstitutionalAccount, ContractId TransactionRecord)
+      with
+        entryId          : Text
+        amount           : Decimal
+        expectedCurrency : Text
+        kind             : EntryKind
+        counterparty     : Text
+        reference        : Text
+        postedAt         : Time
+      controller bank
+      do
+        assertMsg "El importe debe ser estrictamente positivo" (amount > 0.0)
+        assertMsg
+          ("Divisa incompatible: la cuenta es " <> currency
+            <> " y el asiento viene en " <> expectedCurrency)
+          (expectedCurrency == currency)
+        assertMsg
+          ("Fondos insuficientes en " <> accountId <> ": saldo " <> show balance
+            <> " < importe " <> show amount)
+          (balance >= amount)
+        let newBalance = balance - amount
+        newAccount <- create this with balance = newBalance
+        entry <- create TransactionRecord with
+          bank = bank
+          accountId = accountId
+          entryId = entryId
+          direction = DebitEntry
+          kind = kind
+          amount = amount
+          currency = currency
+          counterparty = counterparty
+          reference = reference
+          postedAt = postedAt
+          balanceAfter = newBalance
+          auditors = auditors
+        pure (newAccount, entry)
+
+    -- | Propone una transferencia interbancaria. NO mueve fondos todavia: el
+    --   cargo solo ocurre si la contraparte acepta, en la misma transaccion
+    --   atomica, y solo despues de que la contraparte haya validado y aceptado
+    --   la operacion. Se comprueba aqui la disponibilidad de fondos para no
+    --   proponer algo que no se puede honrar.
+    nonconsuming choice ProposeInterbankTransfer : ContractId InterbankTransferProposal
+      with
+        receiverBank      : Party
+        receiverAccountId : Text
+        settlementId      : Text
+        amount            : Decimal
+        reference         : Text
+        proposedAt        : Time
+        sharedAuditors    : [Party]
+      controller bank
+      do
+        assertMsg "El importe debe ser estrictamente positivo" (amount > 0.0)
+        assertMsg "No se puede transferir a la propia institucion"
+          (receiverBank /= bank)
+        assertMsg
+          ("Fondos insuficientes para comprometer la propuesta: saldo "
+            <> show balance <> " < importe " <> show amount)
+          (balance >= amount)
+        create InterbankTransferProposal with
+          senderBank = bank
+          receiverBank = receiverBank
+          senderAccountId = accountId
+          receiverAccountId = receiverAccountId
+          currency = currency
+          settlementId = settlementId
+          amount = amount
+          reference = reference
+          proposedAt = proposedAt
+          sharedAuditors = sharedAuditors
+
+-- -----------------------------------------------------------------------------
+-- Asiento contable inmutable
+-- -----------------------------------------------------------------------------
+
+-- | Asiento del libro local. No expone NINGUNA choice: una vez creado, su
+--   contenido no puede alterarse. Solo el banco signatario podria archivarlo,
+--   y ese archivado queda a su vez registrado en el ledger de Canton, por lo
+--   que el rastro de auditoria es completo e inalterable.
+template TransactionRecord
+  with
+    bank         : Party
+    accountId    : Text
+    entryId      : Text
+    direction    : EntryDirection
+    kind         : EntryKind
+    amount       : Decimal
+    currency     : Text
+    counterparty : Text      -- ^ Nombre comercial, no identidad de ledger.
+    reference    : Text
+    postedAt     : Time
+    balanceAfter : Decimal
+    auditors     : [Party]
+  where
+    signatory bank
+    observer auditors
+    ensure amount > 0.0 && entryId /= ""
+
+-- -----------------------------------------------------------------------------
+-- Ciclo de liquidacion interbancaria
+--
+--   (1) PROPUESTA   Alfa firma      -> Beta observa       InterbankTransferProposal
+--   (2) MANDATO     Beta firma      -> Alfa observa       TransferMandate
+--   (3) FONDEO      Alfa + Beta firman                    FundsInTransit
+--   (4) LIQUIDACION Alfa + Beta firman                    InterbankSettlementReceipt
+--
+--   Por que no una unica transaccion: en Canton, el nodo participante que
+--   SOMETE una transaccion debe poder leer todos los contratos de entrada.
+--   Si Beta pudiese debitar directamente la cuenta de Alfa en un solo paso,
+--   el nodo de Beta necesitaria el payload de esa cuenta -es decir, el saldo
+--   completo de Alfa-. El modelo lo impide por construccion: el valor sale
+--   del libro de Alfa hacia un contrato portador `FundsInTransit` firmado por
+--   AMBOS, y es ese contrato -no el saldo de Alfa- lo que Beta liquida.
+--
+--   La garantia economica es exacta: en todo momento el importe esta en
+--   UNO Y SOLO UNO de los tres lugares (libro de Alfa, transito, libro de
+--   Beta). Nunca se duplica ni desaparece, y ningun paso deja al valor sin
+--   dueño. Los pasos (3) y (4) son transacciones atomicas multipartita que
+--   los dos nodos bancarios confirman criptograficamente.
+-- -----------------------------------------------------------------------------
+
+-- | (1) Propuesta de transferencia. Firmada por el emisor, observada por el
+--   receptor: primer y unico punto de contacto entre ambas instituciones.
+--   No compromete fondos todavia.
+template InterbankTransferProposal
+  with
+    senderBank        : Party
+    receiverBank      : Party
+    senderAccountId   : Text
+    receiverAccountId : Text
+    currency          : Text
+    settlementId      : Text
+    amount            : Decimal
+    reference         : Text
+    proposedAt        : Time
+    sharedAuditors    : [Party]
+  where
+    signatory senderBank
+    observer receiverBank, sharedAuditors
+
+    ensure amount > 0.0 && senderBank /= receiverBank && settlementId /= ""
+
+    -- | El receptor valida la operacion contra sus propios limites de
+    --   contraparte y se compromete a recibir. Sigue sin moverse un centavo.
+    choice AcceptProposal : ContractId TransferMandate
+      with
+        acceptedAt : Time
+      controller receiverBank
+      do
+        create TransferMandate with
+          senderBank = senderBank
+          receiverBank = receiverBank
+          senderAccountId = senderAccountId
+          receiverAccountId = receiverAccountId
+          currency = currency
+          settlementId = settlementId
+          amount = amount
+          reference = reference
+          acceptedAt = acceptedAt
+          sharedAuditors = sharedAuditors
+
+    -- | El receptor rechaza. Ningun fondo se movio en ningun momento.
+    choice RejectTransfer : ContractId TransferRejection
+      with
+        reason     : Text
+        rejectedAt : Time
+      controller receiverBank
+      do
+        create TransferRejection with
+          senderBank = senderBank
+          receiverBank = receiverBank
+          settlementId = settlementId
+          reason = reason
+          rejectedAt = rejectedAt
+          sharedAuditors = sharedAuditors
+
+    -- | El emisor retira la propuesta antes de que sea aceptada.
+    choice CancelTransfer : ()
+      controller senderBank
+      do pure ()
+
+-- | (2) Mandato de liquidacion: compromiso vinculante del receptor. Firmado
+--   por el receptor, observado por el emisor. Habilita al emisor a fondear.
+template TransferMandate
+  with
+    senderBank        : Party
+    receiverBank      : Party
+    senderAccountId   : Text
+    receiverAccountId : Text
+    currency          : Text
+    settlementId      : Text
+    amount            : Decimal
+    reference         : Text
+    acceptedAt        : Time
+    sharedAuditors    : [Party]
+  where
+    signatory receiverBank
+    observer senderBank, sharedAuditors
+    ensure amount > 0.0
+
+    -- | (3) FONDEO. Transaccion ATOMICA con autoridad de ambas instituciones
+    --   (el receptor por ser signatario del mandato, el emisor por ser el
+    --   controlador). En un solo paso indivisible:
+    --     a) se carga la cuenta del emisor,
+    --     b) se escribe el asiento PRIVADO del emisor,
+    --     c) nace el contrato portador firmado por ambos.
+    --   El nodo del receptor confirma la transaccion sin llegar a ver ni el
+    --   saldo ni el asiento del emisor: solo el nodo (c) le concierne.
+    choice FundTransfer : (ContractId InstitutionalAccount, ContractId FundsInTransit)
+      with
+        senderAccountCid : ContractId InstitutionalAccount
+        fundedAt         : Time
+      controller senderBank
+      do
+        (nuevaCuenta, _asiento) <-
+          exercise senderAccountCid PostDebit with
+            entryId = settlementId <> "-OUT"
+            amount = amount
+            expectedCurrency = currency
+            kind = InterbankOutgoing
+            counterparty = reference
+            reference = reference
+            postedAt = fundedAt
+
+        enTransito <- create FundsInTransit with
+          senderBank = senderBank
+          receiverBank = receiverBank
+          receiverAccountId = receiverAccountId
+          currency = currency
+          settlementId = settlementId
+          amount = amount
+          reference = reference
+          fundedAt = fundedAt
+          sharedAuditors = sharedAuditors
+
+        pure (nuevaCuenta, enTransito)
+
+    -- | El receptor se retracta antes del fondeo.
+    choice WithdrawMandate : ()
+      controller receiverBank
+      do pure ()
+
+-- | (3) Valor en transito. Contrato PORTADOR firmado por AMBOS bancos: el
+--   emisor ya no lo tiene en su libro y el receptor aun no lo ha acreditado,
+--   pero su existencia y su importe estan criptograficamente comprometidos
+--   por las dos instituciones. Ninguna puede repudiarlo ni alterarlo sola.
+--
+--   Revela a la contraparte EXCLUSIVAMENTE el importe de esta operacion, que
+--   por definicion ya conoce. Nada del saldo, la cartera ni la posicion del
+--   emisor se filtra: de ahi el riesgo cero de front-running.
+template FundsInTransit
+  with
+    senderBank        : Party
+    receiverBank      : Party
+    receiverAccountId : Text
+    currency          : Text
+    settlementId      : Text
+    amount            : Decimal
+    reference         : Text
+    fundedAt          : Time
+    sharedAuditors    : [Party]
+  where
+    signatory senderBank, receiverBank
+    observer sharedAuditors
+    ensure amount > 0.0
+
+    -- | (4) LIQUIDACION FINAL. Transaccion ATOMICA multipartita: consume el
+    --   valor en transito, acredita el libro del receptor, escribe su asiento
+    --   privado y emite el recibo bilateral. O todo, o nada.
+    choice SettleIncoming : SettlementResult
+      with
+        receiverAccountCid : ContractId InstitutionalAccount
+        settledAt          : Time
+      controller receiverBank
+      do
+        -- El receptor valida SU PROPIA cuenta. Jamas se hace `fetch` del libro
+        -- emisor: el receptor no tiene -ni necesita- visibilidad sobre el.
+        cuentaReceptora <- fetch receiverAccountCid
+        assertMsg "La cuenta receptora no pertenece al banco receptor"
+          (cuentaReceptora.bank == receiverBank)
+        assertMsg "La cuenta receptora no coincide con la liquidacion pactada"
+          (cuentaReceptora.accountId == receiverAccountId)
+
+        (nuevaCuenta, asiento) <-
+          exercise receiverAccountCid PostCredit with
+            entryId = settlementId <> "-IN"
+            amount = amount
+            expectedCurrency = currency
+            kind = InterbankIncoming
+            counterparty = reference
+            reference = reference
+            postedAt = settledAt
+
+        recibo <- create InterbankSettlementReceipt with
+          senderBank = senderBank
+          receiverBank = receiverBank
+          settlementId = settlementId
+          amount = amount
+          currency = currency
+          reference = reference
+          settledAt = settledAt
+          sharedAuditors = sharedAuditors
+
+        pure SettlementResult with
+          receiverAccount = nuevaCuenta
+          receiverEntry = asiento
+          receipt = recibo
+
+    -- | Devolucion: el receptor no puede o no quiere acreditar. El valor
+    --   vuelve a estar disponible para el emisor, nunca se pierde.
+    choice ReturnFunds : ContractId FundsReturn
+      with
+        reason     : Text
+        returnedAt : Time
+      controller receiverBank
+      do
+        create FundsReturn with
+          senderBank = senderBank
+          receiverBank = receiverBank
+          currency = currency
+          settlementId = settlementId
+          amount = amount
+          reason = reason
+          returnedAt = returnedAt
+          sharedAuditors = sharedAuditors
+
+-- | Valor devuelto, pendiente de reingresar al libro del emisor.
+template FundsReturn
+  with
+    senderBank     : Party
+    receiverBank   : Party
+    currency       : Text
+    settlementId   : Text
+    amount         : Decimal
+    reason         : Text
+    returnedAt     : Time
+    sharedAuditors : [Party]
+  where
+    signatory senderBank, receiverBank
+    observer sharedAuditors
+    ensure amount > 0.0
+
+    -- | El emisor reingresa el importe en su propio libro. Cierra el ciclo
+    --   sin que el valor se haya duplicado ni perdido en ningun instante.
+    choice ReclaimFunds : (ContractId InstitutionalAccount, ContractId TransactionRecord)
+      with
+        senderAccountCid : ContractId InstitutionalAccount
+        reclaimedAt      : Time
+      controller senderBank
+      do
+        exercise senderAccountCid PostCredit with
+          entryId = settlementId <> "-RET"
+          amount = amount
+          expectedCurrency = currency
+          kind = InterbankIncoming
+          counterparty = reason
+          reference = "Devolucion de " <> settlementId
+          postedAt = reclaimedAt
+
+-- | (4) Prueba bilateral de que la liquidacion ocurrio. Firmada por AMBOS
+--   bancos: ninguno puede negar ni reescribir unilateralmente el hecho
+--   (no repudio). Es el unico contrato que los dos libros comparten.
+template InterbankSettlementReceipt
+  with
+    senderBank     : Party
+    receiverBank   : Party
+    settlementId   : Text
+    amount         : Decimal
+    currency       : Text
+    reference      : Text
+    settledAt      : Time
+    sharedAuditors : [Party]
+  where
+    signatory senderBank, receiverBank
+    observer sharedAuditors
+    ensure amount > 0.0
+
+-- | Constancia de rechazo, visible para ambas partes y para el regulador.
+template TransferRejection
+  with
+    senderBank     : Party
+    receiverBank   : Party
+    settlementId   : Text
+    reason         : Text
+    rejectedAt     : Time
+    sharedAuditors : [Party]
+  where
+    signatory receiverBank
+    observer senderBank, sharedAuditors
+
+-- =============================================================================
+--  SECCION DE VALIDACION FORMAL (Daml.Script)
+--
+--  Estos scripts NO son documentacion: se ejecutan contra el ledger y fallan
+--  si alguna garantia deja de cumplirse. Son la prueba ejecutable que se
+--  proyecta en la demo ejecutiva.
+-- =============================================================================
+
+-- | Identidades de la demo. En produccion cada `Party` vive alojada en el nodo
+--   participante de su propia institucion.
+data DemoParties = DemoParties
+  with
+    bancoAlfa    : Party  -- ^ Participante emisor.
+    bancoBeta    : Party  -- ^ Participante receptor.
+    bancoGamma   : Party  -- ^ Tercero NO involucrado (testigo de privacidad).
+    bancoCentral : Party  -- ^ Regulador, observador de solo lectura.
+  deriving (Eq, Show)
+
+-- | Escenario ya inicializado: licencias y cuentas operativas de cada banco.
+data DemoLedger = DemoLedger
+  with
+    parties       : DemoParties
+    licenciaAlfa  : ContractId BankLicense
+    licenciaBeta  : ContractId BankLicense
+    licenciaGamma : ContractId BankLicense
+    cuentaAlfa    : ContractId InstitutionalAccount
+    cuentaBeta    : ContractId InstitutionalAccount
+    cuentaGamma   : ContractId InstitutionalAccount
+  deriving (Eq, Show)
+
+-- | Asigna las identidades de los cuatro participantes.
+setupParties : Script DemoParties
+setupParties = do
+  bancoAlfa    <- allocateParty "BancoAlfa"
+  bancoBeta    <- allocateParty "BancoBeta"
+  bancoGamma   <- allocateParty "BancoGamma"
+  bancoCentral <- allocateParty "BancoCentral"
+  pure DemoParties with ..
+
+-- | Onboarding: cada banco emite su licencia y abre su cuenta nostro en USD.
+--   El Banco Central queda como observador de las tres instituciones.
+setupLedger : Script DemoLedger
+setupLedger = do
+  parties@DemoParties{..} <- setupParties
+  let auditores = [bancoCentral]
+
+  licenciaAlfa <- submit bancoAlfa $ createCmd BankLicense with
+    bank = bancoAlfa
+    legalName = "Banco Alfa S.A."
+    bic = "ALFAXXM0"
+    auditors = auditores
+
+  licenciaBeta <- submit bancoBeta $ createCmd BankLicense with
+    bank = bancoBeta
+    legalName = "Banco Beta S.A."
+    bic = "BETAXXM0"
+    auditors = auditores
+
+  licenciaGamma <- submit bancoGamma $ createCmd BankLicense with
+    bank = bancoGamma
+    legalName = "Banco Gamma S.A."
+    bic = "GAMMXXM0"
+    auditors = auditores
+
+  cuentaAlfa <- submit bancoAlfa $ exerciseCmd licenciaAlfa OpenAccount with
+    accountId = "ALFA-NOSTRO-USD"
+    accountName = "Nostro USD - Tesoreria Alfa"
+    currency = "USD"
+    openingBalance = 10000000.0
+
+  cuentaBeta <- submit bancoBeta $ exerciseCmd licenciaBeta OpenAccount with
+    accountId = "BETA-NOSTRO-USD"
+    accountName = "Nostro USD - Tesoreria Beta"
+    currency = "USD"
+    openingBalance = 4000000.0
+
+  cuentaGamma <- submit bancoGamma $ exerciseCmd licenciaGamma OpenAccount with
+    accountId = "GAMMA-NOSTRO-USD"
+    accountName = "Nostro USD - Tesoreria Gamma"
+    currency = "USD"
+    openingBalance = 1000000.0
+
+  pure DemoLedger with ..
+
+-- -----------------------------------------------------------------------------
+-- Escenario principal
+-- -----------------------------------------------------------------------------
+
+-- | Demo ejecutiva completa. Recorre el ciclo de vida real: movimientos
+--   internos segregados -> liquidacion interbancaria bilateral -> verificacion
+--   de privacidad -> auditoria regulatoria -> controles negativos.
+demoCompleta : Script ()
+demoCompleta = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+      auditores = [bancoCentral]
+  t0 <- getTime
+
+  -- ---------------------------------------------------------------------------
+  -- 1. Movimientos internos: cada banco escribe SOLO en su propio libro.
+  -- ---------------------------------------------------------------------------
+  (cuentaAlfa1, _) <- submit bancoAlfa $ exerciseCmd cuentaAlfa PostCredit with
+    entryId = "ALFA-0001"
+    amount = 500000.0
+    expectedCurrency = "USD"
+    kind = ClientMovement
+    counterparty = "Cliente corporativo 8841"
+    reference = "Deposito nomina trimestral"
+    postedAt = t0
+
+  (cuentaAlfa2, _) <- submit bancoAlfa $ exerciseCmd cuentaAlfa1 PostDebit with
+    entryId = "ALFA-0002"
+    amount = 120000.0
+    expectedCurrency = "USD"
+    kind = TreasuryMovement
+    counterparty = "Mesa de dinero interna"
+    reference = "Reposicion de encaje"
+    postedAt = t0
+
+  (cuentaBeta1, _) <- submit bancoBeta $ exerciseCmd cuentaBeta PostCredit with
+    entryId = "BETA-0001"
+    amount = 250000.0
+    expectedCurrency = "USD"
+    kind = TreasuryMovement
+    counterparty = "Mesa de dinero interna"
+    reference = "Liquidez overnight"
+    postedAt = t0
+
+  Some estadoAlfa <- queryContractId bancoAlfa cuentaAlfa2
+  Some estadoBeta <- queryContractId bancoBeta cuentaBeta1
+  estadoAlfa.balance === 10380000.0
+  estadoBeta.balance === 4250000.0
+  let totalInicial = estadoAlfa.balance + estadoBeta.balance
+
+  -- ---------------------------------------------------------------------------
+  -- 2. Ciclo de liquidacion interbancaria con validacion bilateral.
+  -- ---------------------------------------------------------------------------
+  let importe = 2500000.0
+
+  -- (1) Alfa propone. No se mueve un centavo.
+  propuesta <- submit bancoAlfa $ exerciseCmd cuentaAlfa2 ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-2026-0001"
+    amount = importe
+    reference = "Liquidacion RTGS mayorista"
+    proposedAt = t0
+    sharedAuditors = auditores
+
+  -- (2) Beta valida contra sus limites de contraparte y se compromete.
+  mandato <- submit bancoBeta $ exerciseCmd propuesta AcceptProposal with
+    acceptedAt = addRelTime t0 (minutes 1)
+
+  -- (3) FONDEO ATOMICO: cargo + asiento privado + valor en transito.
+  (cuentaAlfa3, enTransito) <- submit bancoAlfa $ exerciseCmd mandato FundTransfer with
+    senderAccountCid = cuentaAlfa2
+    fundedAt = addRelTime t0 (minutes 2)
+
+  -- CONSERVACION DEL VALOR EN EL ESTADO INTERMEDIO: el importe esta en uno y
+  -- solo un lugar. Ya salio del libro de Alfa, aun no entro en el de Beta.
+  Some alfaEnTransito <- queryContractId bancoAlfa cuentaAlfa3
+  Some betaEnTransito <- queryContractId bancoBeta cuentaBeta1
+  Some valorEnTransito <- queryContractId bancoAlfa enTransito
+  alfaEnTransito.balance === 7880000.0
+  betaEnTransito.balance === 4250000.0
+  valorEnTransito.amount === importe
+  (alfaEnTransito.balance + valorEnTransito.amount + betaEnTransito.balance)
+    === totalInicial
+
+  -- (4) LIQUIDACION ATOMICA FINAL en el libro del receptor.
+  resultado <- submit bancoBeta $ exerciseCmd enTransito SettleIncoming with
+    receiverAccountCid = cuentaBeta1
+    settledAt = addRelTime t0 (minutes 3)
+
+  Some alfaFinal <- queryContractId bancoAlfa cuentaAlfa3
+  Some betaFinal <- queryContractId bancoBeta resultado.receiverAccount
+  alfaFinal.balance === 7880000.0
+  betaFinal.balance === 6750000.0
+  (alfaFinal.balance + betaFinal.balance) === totalInicial
+
+  -- El valor en transito fue consumido: no quedan importes en limbo.
+  transitosVivos <- query @FundsInTransit bancoAlfa
+  length transitosVivos === 0
+
+  -- ---------------------------------------------------------------------------
+  -- 3. PRIVACIDAD DE SUB-TRANSACCION (el corazon de la demo).
+  -- ---------------------------------------------------------------------------
+
+  -- 3.a El Banco Gamma no participo: su ledger no contiene absolutamente nada
+  --     de esta operacion, ni siquiera constancia de que existio.
+  gammaVeCuentas   <- query @InstitutionalAccount bancoGamma
+  gammaVeAsientos  <- query @TransactionRecord bancoGamma
+  gammaVeRecibos   <- query @InterbankSettlementReceipt bancoGamma
+  gammaVePropuesta <- query @InterbankTransferProposal bancoGamma
+  length gammaVeCuentas === 1          -- unicamente su propia cuenta nostro
+  length gammaVeAsientos === 0
+  length gammaVeRecibos === 0
+  length gammaVePropuesta === 0
+
+  -- 3.b Gamma no puede leer la cuenta de Alfa ni conociendo su identificador:
+  --     el participante de Gamma sencillamente no tiene el payload.
+  vistaGammaSobreAlfa <- queryContractId bancoGamma cuentaAlfa3
+  assertMsg "FALLO DE PRIVACIDAD: Banco Gamma pudo leer la cuenta de Alfa"
+    (isNone vistaGammaSobreAlfa)
+
+  -- 3.c Beta, aun siendo CONTRAPARTE de la liquidacion, tampoco ve el libro
+  --     interno de Alfa: ni el saldo, ni un solo asiento contable.
+  vistaBetaSobreCuentaAlfa <- queryContractId bancoBeta cuentaAlfa3
+  assertMsg "FALLO DE PRIVACIDAD: Beta pudo leer el saldo de Alfa"
+    (isNone vistaBetaSobreCuentaAlfa)
+
+  asientosVisiblesParaBeta <- query @TransactionRecord bancoBeta
+  assertMsg "FALLO DE PRIVACIDAD: Beta ve asientos contables de otra institucion"
+    (all (\(_, asiento) -> asiento.bank == bancoBeta) asientosVisiblesParaBeta)
+
+  -- 3.d Simetricamente, Alfa no ve el libro de Beta.
+  vistaAlfaSobreCuentaBeta <- queryContractId bancoAlfa resultado.receiverAccount
+  assertMsg "FALLO DE PRIVACIDAD: Alfa pudo leer el saldo de Beta"
+    (isNone vistaAlfaSobreCuentaBeta)
+
+  asientosVisiblesParaAlfa <- query @TransactionRecord bancoAlfa
+  assertMsg "FALLO DE PRIVACIDAD: Alfa ve asientos contables de otra institucion"
+    (all (\(_, asiento) -> asiento.bank == bancoAlfa) asientosVisiblesParaAlfa)
+
+  -- 3.e Lo UNICO compartido es el recibo bilateral: identico para ambos.
+  Some reciboAlfa <- queryContractId bancoAlfa resultado.receipt
+  Some reciboBeta <- queryContractId bancoBeta resultado.receipt
+  reciboAlfa === reciboBeta
+  reciboAlfa.amount === importe
+
+  -- ---------------------------------------------------------------------------
+  -- 4. AUDITORIA REGULATORIA: lectura total, cero capacidad de ejecucion.
+  -- ---------------------------------------------------------------------------
+  centralVeCuentas  <- query @InstitutionalAccount bancoCentral
+  centralVeAsientos <- query @TransactionRecord bancoCentral
+  centralVeRecibos  <- query @InterbankSettlementReceipt bancoCentral
+  length centralVeCuentas === 3   -- las tres instituciones supervisadas
+  length centralVeRecibos === 1
+  assertMsg "El regulador deberia ver los asientos de ambos libros"
+    (length centralVeAsientos >= 5)
+  assertMsg "El regulador deberia ver asientos de mas de una institucion"
+    (any (\(_, a) -> a.bank == bancoAlfa) centralVeAsientos
+      && any (\(_, a) -> a.bank == bancoBeta) centralVeAsientos)
+
+  -- El regulador observa, pero NO puede mover fondos de un supervisado.
+  submitMustFail bancoCentral $ exerciseCmd resultado.receiverAccount PostDebit with
+    entryId = "REG-INTRUSION"
+    amount = 1.0
+    expectedCurrency = "USD"
+    kind = TreasuryMovement
+    counterparty = "Regulador"
+    reference = "Intento de ejecucion no autorizado"
+    postedAt = t0
+
+  -- ---------------------------------------------------------------------------
+  -- 5. CONTROLES NEGATIVOS: lo que el modelo hace estructuralmente imposible.
+  -- ---------------------------------------------------------------------------
+
+  -- 5.a Ningun banco puede cargar la cuenta de otro.
+  submitMustFail bancoBeta $ exerciseCmd cuentaAlfa3 PostDebit with
+    entryId = "BETA-ROBO"
+    amount = 1000.0
+    expectedCurrency = "USD"
+    kind = TreasuryMovement
+    counterparty = "Beta"
+    reference = "Cargo no autorizado sobre libro ajeno"
+    postedAt = t0
+
+  -- 5.b No se puede girar en descubierto.
+  submitMustFail bancoAlfa $ exerciseCmd cuentaAlfa3 PostDebit with
+    entryId = "ALFA-SOBREGIRO"
+    amount = 999999999.0
+    expectedCurrency = "USD"
+    kind = TreasuryMovement
+    counterparty = "Mesa de dinero"
+    reference = "Sobregiro"
+    postedAt = t0
+
+  -- 5.c No se puede asentar en una divisa distinta a la de la cuenta.
+  submitMustFail bancoAlfa $ exerciseCmd cuentaAlfa3 PostCredit with
+    entryId = "ALFA-DIVISA"
+    amount = 1000.0
+    expectedCurrency = "EUR"
+    kind = TreasuryMovement
+    counterparty = "Mesa de cambios"
+    reference = "Divisa incorrecta"
+    postedAt = t0
+
+  debug "OK - demoCompleta: atomicidad, segregacion y auditoria verificadas"
+  pure ()
+
+-- -----------------------------------------------------------------------------
+-- Pruebas adversariales independientes
+-- -----------------------------------------------------------------------------
+
+-- | Un tercero ajeno a la operacion no puede liquidar ni interferir en el
+--   valor en transito entre otras dos instituciones.
+testTerceroNoPuedeInterferir : Script ()
+testTerceroNoPuedeInterferir = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+  t0 <- getTime
+
+  propuesta <- submit bancoAlfa $ exerciseCmd cuentaAlfa ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-ADV-0001"
+    amount = 100000.0
+    reference = "Ajuste de posicion"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  -- Gamma no puede aceptar una propuesta dirigida a Beta.
+  submitMustFail bancoGamma $ exerciseCmd propuesta AcceptProposal with
+    acceptedAt = t0
+
+  mandato <- submit bancoBeta $ exerciseCmd propuesta AcceptProposal with
+    acceptedAt = t0
+
+  -- Gamma no puede fondear con la cuenta de Alfa.
+  submitMustFail bancoGamma $ exerciseCmd mandato FundTransfer with
+    senderAccountCid = cuentaAlfa
+    fundedAt = t0
+
+  (_, enTransito) <- submit bancoAlfa $ exerciseCmd mandato FundTransfer with
+    senderAccountCid = cuentaAlfa
+    fundedAt = t0
+
+  -- Gamma no puede liquidar valor en transito ajeno...
+  submitMustFail bancoGamma $ exerciseCmd enTransito SettleIncoming with
+    receiverAccountCid = cuentaGamma
+    settledAt = t0
+
+  -- ...ni el propio emisor puede auto-liquidarse: el control es del receptor.
+  submitMustFail bancoAlfa $ exerciseCmd enTransito SettleIncoming with
+    receiverAccountCid = cuentaGamma
+    settledAt = t0
+
+  -- Beta tampoco puede desviar los fondos a una cuenta que no es la pactada.
+  submitMustFail bancoBeta $ exerciseCmd enTransito SettleIncoming with
+    receiverAccountCid = cuentaGamma
+    settledAt = t0
+
+  debug "OK - testTerceroNoPuedeInterferir"
+  pure ()
+
+-- | Ciclo de devolucion: si el receptor no acredita, el valor regresa integro
+--   al libro emisor. En ningun instante se duplica ni se pierde.
+testDevolucionDeFondos : Script ()
+testDevolucionDeFondos = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+  t0 <- getTime
+  let importe = 750000.0
+
+  Some saldoInicial <- queryContractId bancoAlfa cuentaAlfa
+
+  propuesta <- submit bancoAlfa $ exerciseCmd cuentaAlfa ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-RET-0001"
+    amount = importe
+    reference = "Pago corresponsal"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  mandato <- submit bancoBeta $ exerciseCmd propuesta AcceptProposal with
+    acceptedAt = t0
+
+  (cuentaAlfaFondeada, enTransito) <- submit bancoAlfa $ exerciseCmd mandato FundTransfer with
+    senderAccountCid = cuentaAlfa
+    fundedAt = t0
+
+  Some alfaTrasFondeo <- queryContractId bancoAlfa cuentaAlfaFondeada
+  alfaTrasFondeo.balance === saldoInicial.balance - importe
+
+  devolucion <- submit bancoBeta $ exerciseCmd enTransito ReturnFunds with
+    reason = "Cuenta beneficiaria bloqueada por control de sanciones"
+    returnedAt = t0
+
+  (cuentaAlfaRestituida, _) <- submit bancoAlfa $ exerciseCmd devolucion ReclaimFunds with
+    senderAccountCid = cuentaAlfaFondeada
+    reclaimedAt = t0
+
+  Some alfaRestituida <- queryContractId bancoAlfa cuentaAlfaRestituida
+  alfaRestituida.balance === saldoInicial.balance
+
+  -- Beta nunca vio incrementado su libro.
+  Some betaIntacta <- queryContractId bancoBeta cuentaBeta
+  betaIntacta.balance === 4000000.0
+
+  debug "OK - testDevolucionDeFondos"
+  pure ()
+
+-- | El rechazo temprano no compromete fondos en ningun momento.
+testRechazoTemprano : Script ()
+testRechazoTemprano = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+  t0 <- getTime
+
+  propuesta <- submit bancoAlfa $ exerciseCmd cuentaAlfa ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-REJ-0001"
+    amount = 5000000.0
+    reference = "Operacion fuera de limite"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  rechazo <- submit bancoBeta $ exerciseCmd propuesta RejectTransfer with
+    reason = "Limite de contraparte excedido para la ventana intradia"
+    rejectedAt = t0
+
+  Some alfaIntacta <- queryContractId bancoAlfa cuentaAlfa
+  alfaIntacta.balance === 10000000.0
+
+  Some constancia <- queryContractId bancoAlfa rechazo
+  constancia.settlementId === "STL-REJ-0001"
+
+  -- El regulador tiene constancia del rechazo.
+  Some constanciaRegulador <- queryContractId bancoCentral rechazo
+  constanciaRegulador.reason === constancia.reason
+
+  debug "OK - testRechazoTemprano"
+  pure ()
+
+-- | No se puede proponer una transferencia por encima del saldo disponible.
+testPropuestaSinFondos : Script ()
+testPropuestaSinFondos = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+  t0 <- getTime
+
+  submitMustFail bancoGamma $ exerciseCmd cuentaGamma ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-NSF-0001"
+    amount = 99000000.0
+    reference = "Importe superior al saldo"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  debug "OK - testPropuestaSinFondos"
+  pure ()
+
+-- | Cualquiera de las dos partes puede abandonar el ciclo antes del fondeo
+--   sin consecuencia patrimonial alguna.
+testCancelacionYRetiro : Script ()
+testCancelacionYRetiro = do
+  DemoLedger{..} <- setupLedger
+  let DemoParties{..} = parties
+  t0 <- getTime
+
+  -- El emisor retira su propia propuesta.
+  propuesta <- submit bancoAlfa $ exerciseCmd cuentaAlfa ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-CAN-0001"
+    amount = 300000.0
+    reference = "Operacion revocada por el emisor"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  -- El receptor no puede cancelar una propuesta ajena.
+  submitMustFail bancoBeta $ exerciseCmd propuesta CancelTransfer
+  submit bancoAlfa $ exerciseCmd propuesta CancelTransfer
+
+  -- El receptor se retracta de un mandato ya aceptado, antes del fondeo.
+  propuesta2 <- submit bancoAlfa $ exerciseCmd cuentaAlfa ProposeInterbankTransfer with
+    receiverBank = bancoBeta
+    receiverAccountId = "BETA-NOSTRO-USD"
+    settlementId = "STL-CAN-0002"
+    amount = 300000.0
+    reference = "Operacion revocada por el receptor"
+    proposedAt = t0
+    sharedAuditors = [bancoCentral]
+
+  mandato <- submit bancoBeta $ exerciseCmd propuesta2 AcceptProposal with
+    acceptedAt = t0
+
+  submitMustFail bancoAlfa $ exerciseCmd mandato WithdrawMandate
+  submit bancoBeta $ exerciseCmd mandato WithdrawMandate
+
+  -- Un mandato retirado ya no puede fondearse.
+  submitMustFail bancoAlfa $ exerciseCmd mandato FundTransfer with
+    senderAccountCid = cuentaAlfa
+    fundedAt = t0
+
+  -- El libro emisor jamas se movio.
+  Some alfaIntacta <- queryContractId bancoAlfa cuentaAlfa
+  alfaIntacta.balance === 10000000.0
+
+  debug "OK - testCancelacionYRetiro"
+  pure ()

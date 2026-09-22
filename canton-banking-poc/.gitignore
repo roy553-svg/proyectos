@@ -1,0 +1,7 @@
+.daml/
+dist/
+node_modules/
+frontend/dist/
+*.dar
+canton-log/
+log/
