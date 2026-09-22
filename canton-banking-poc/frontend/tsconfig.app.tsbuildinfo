@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/ArbolTransaccion.tsx","./src/components/LibroContable.tsx","./src/components/PanelCripto.tsx","./src/components/Primitivos.tsx","./src/components/RedEnVivo.tsx","./src/lib/cripto.ts","./src/lib/escenario.ts","./src/lib/estilos.ts","./src/lib/ledgerReal.ts","./src/lib/tipos.ts"],"version":"5.9.3"}

@@ -9,3 +9,4 @@ canton/parties.json
 canton/participants.json
 frontend/node_modules/
 frontend/.vite/
+frontend/*.tsbuildinfo
