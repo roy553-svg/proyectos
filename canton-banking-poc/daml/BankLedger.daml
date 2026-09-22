@@ -542,6 +542,12 @@ template TransferRejection
 --  Estos scripts NO son documentacion: se ejecutan contra el ledger y fallan
 --  si alguna garantia deja de cumplirse. Son la prueba ejecutable que se
 --  proyecta en la demo ejecutiva.
+--
+--  Nota de industrializacion: al convivir en el mismo PAQUETE que las
+--  plantillas, el DAR resultante depende de `daml-script` y el compilador lo
+--  advierte (-Wtemplate-interface-depends-on-daml-script). Para produccion se
+--  extraen a un paquete propio que dependa del modelo; se mantienen aqui para
+--  que la demo sea un unico proyecto legible de principio a fin.
 -- =============================================================================
 
 -- | Identidades de la demo. En produccion cada `Party` vive alojada en el nodo
