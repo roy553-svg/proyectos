@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Voz y red: lo minimo indispensable. Sin contactos, sin SMS, sin camara. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Ubicacion opcional: el conductor la apaga desde el panel de privacidad. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:required="false" />
+
+    <!-- OBD-II por Bluetooth en radios chinas sin CAN directo. -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
+        android:required="false" />
+
+    <!-- Telemetria nativa en Android Automotive OS. -->
+    <uses-permission android:name="com.google.android.gms.permission.CAR_SPEED"
+        android:required="false" />
+    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE"
+        android:required="false" />
+
+    <!-- El microfono es opcional: sin el, DriveAI funciona por texto. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
+    <uses-feature android:name="android.software.car.templates_host" android:required="false" />
+
+    <application
+        android:name=".DriveAiApp"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.DriveAI"
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true"
+        android:largeHeap="false"
+        tools:targetApi="28">
+
+        <!-- Declara compatibilidad con Android Auto y AAOS -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="1" />
+        <meta-data
+            android:name="com.android.automotive"
+            android:resource="@xml/automotive_app_desc" />
+
+        <!-- ============================================================
+             Cabina tactil: radios chinas Android 9+, tablets y pantallas
+             ============================================================ -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|density"
+            android:theme="@style/Theme.DriveAI"
+            android:resizeableActivity="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Aparece en el lanzador de Android Automotive OS -->
+                <category android:name="android.intent.category.APP_MAPS" />
+            </intent-filter>
+
+            <!-- El boton de voz del volante abre DriveAI directamente -->
+            <intent-filter>
+                <action android:name="android.intent.action.VOICE_COMMAND" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.speech.action.WEB_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- ============================================================
+             CarAppService: plantillas nativas de Android Auto / AAOS
+             ============================================================ -->
+        <service
+            android:name=".DriveAiCarAppService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <!-- Categoria POI: DriveAI es un asistente de a bordo, no un
+                     reproductor ni un navegador. -->
+                <category android:name="androidx.car.app.category.POI" />
+            </intent-filter>
+        </service>
+
+        <!-- Receptor del boton de voz del volante (KEYCODE_VOICE_ASSIST) -->
+        <receiver
+            android:name=".SteeringWheelReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

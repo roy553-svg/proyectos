@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DriveAI</string>
+    <string name="mic_content_description">Orbe de voz DriveAI</string>
+    <string name="offline_notice">Modo local: respondiendo sin conexión.</string>
+</resources>

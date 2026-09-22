@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Tema de cabina: negro OLED puro, sin barras y sin animación de arranque.
+      Cero destello blanco al abrir la app de noche.
+    -->
+    <style name="Theme.DriveAI" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/cockpit_bg</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentTransitions">false</item>
+        <item name="android:colorBackground">@color/cockpit_bg</item>
+        <item name="android:navigationBarColor">@color/cockpit_bg</item>
+        <item name="android:statusBarColor">@color/cockpit_bg</item>
+    </style>
+</resources>

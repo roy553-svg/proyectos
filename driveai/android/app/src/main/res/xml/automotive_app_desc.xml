@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declara ante el host automotriz que DriveAI usa la libreria de plantillas
+  (androidx.car.app) y no dibuja interfaz propia en Android Auto / AAOS.
+-->
+<automotiveApp>
+    <uses name="template" />
+</automotiveApp>

@@ -1,0 +1,21 @@
+# Dependencias
+node_modules/
+
+# Artefactos de compilacion
+backend/dist/
+backend/public/
+frontend/dist/
+*.tsbuildinfo
+
+# Secretos
+.env
+.env.local
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+*.keystore

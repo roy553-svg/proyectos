@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    /* Sin seleccion de texto ni menus contextuales al tocar en curva */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  body {
+    @apply bg-cockpit-bg text-zinc-100 antialiased overflow-hidden;
+    font-family: system-ui, -apple-system, 'Roboto', 'Segoe UI', sans-serif;
+    /* Tabular: los digitos del HUD no bailan al cambiar de valor */
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Boton tactil masivo: se acierta sin desviar la vista del camino. */
+  .btn-cockpit {
+    @apply min-h-touch px-5 rounded-2xl font-semibold text-cta uppercase
+           tracking-wide border-2 flex items-center justify-center gap-3
+           transition-transform duration-75 active:scale-[0.97]
+           disabled:opacity-35 disabled:active:scale-100;
+  }
+  .btn-go   { @apply btn-cockpit bg-emerald-500/15 border-emerald-500/70 text-emerald-300; }
+  .btn-info { @apply btn-cockpit bg-cyan-500/10   border-cyan-500/60    text-cyan-300; }
+  .btn-warn { @apply btn-cockpit bg-amber-500/10  border-amber-500/60   text-amber-300; }
+  .btn-mute { @apply btn-cockpit bg-zinc-800/70   border-zinc-700       text-zinc-300; }
+
+  .panel {
+    @apply bg-cockpit-panel/80 border border-cockpit-line rounded-3xl;
+  }
+}
+
+/* La barra de scroll roba pixeles y distrae: fuera. */
+::-webkit-scrollbar { width: 0; height: 0; }

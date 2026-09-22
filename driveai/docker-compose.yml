@@ -1,0 +1,116 @@
+# =====================================================================
+# DriveAI :: orquestacion del gateway
+#
+# El coche solo ejecuta el cliente delgado. Todo lo pesado (razonamiento,
+# embeddings, memoria de 4 capas) vive aqui.
+#
+#   docker compose up -d
+#   curl http://localhost:8080/api/assistant/health
+# =====================================================================
+
+services:
+  # -------------------------------------------------------------------
+  # Memoria jerarquica en 4 capas + busqueda semantica vectorial
+  # -------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: driveai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-driveai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-driveai}
+      POSTGRES_DB: ${POSTGRES_DB:-driveai}
+      # Checksums: una radio que corta la corriente al apagar el coche
+      # puede corromper paginas; preferimos detectarlo.
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - driveai-pgdata:/var/lib/postgresql/data
+      # Las 4 capas se crean solas en el primer arranque.
+      - ./backend/db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-driveai} -d ${POSTGRES_DB:-driveai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # -------------------------------------------------------------------
+  # Cache de baja latencia + rate limiting de voz
+  # -------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: driveai-redis
+    restart: unless-stopped
+    # Cache puro: si se llena, expulsa lo menos usado en vez de fallar.
+    command: >
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+
+  # -------------------------------------------------------------------
+  # Gateway NestJS (build multi-stage sobre Node 20 Alpine)
+  # -------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: driveai-backend
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      NODE_ENV: production
+
+      # --- Google Gemini (API gratuita) ---
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_PRIMARY_MODEL: ${GEMINI_PRIMARY_MODEL:-gemini-3.8-flash}
+      GEMINI_FALLBACK_MODEL: ${GEMINI_FALLBACK_MODEL:-gemini-2.5-flash}
+      GEMINI_TIMEOUT_MS: ${GEMINI_TIMEOUT_MS:-3500}
+
+      # --- Infraestructura ---
+      DATABASE_URL: postgresql://${POSTGRES_USER:-driveai}:${POSTGRES_PASSWORD:-driveai}@postgres:5432/${POSTGRES_DB:-driveai}
+      REDIS_URL: redis://redis:6379
+
+      # --- Vehiculo: mock | generic-android | tesla ---
+      VEHICLE_PROVIDER: ${VEHICLE_PROVIDER:-mock}
+      ANDROID_BRIDGE_URL: ${ANDROID_BRIDGE_URL:-http://host.docker.internal:8099}
+      TESLA_CLIENT_ID: ${TESLA_CLIENT_ID:-}
+      TESLA_CLIENT_SECRET: ${TESLA_CLIENT_SECRET:-}
+      TESLA_REDIRECT_URI: ${TESLA_REDIRECT_URI:-}
+      TESLA_VEHICLE_TAG: ${TESLA_VEHICLE_TAG:-}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      # Permite alcanzar el puente CAN de la radio desde el contenedor.
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  driveai-pgdata:
+    name: driveai-pgdata

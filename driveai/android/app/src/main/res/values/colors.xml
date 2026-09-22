@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="cockpit_bg">#FF09090B</color>   <!-- zinc-950 -->
+    <color name="cockpit_go">#FF10B981</color>   <!-- emerald-500 -->
+    <color name="cockpit_info">#FF22D3EE</color> <!-- cyan-400 -->
+    <color name="cockpit_warn">#FFF59E0B</color> <!-- amber-500 -->
+    <color name="cockpit_stop">#FFEF4444</color> <!-- red-500 -->
+</resources>
