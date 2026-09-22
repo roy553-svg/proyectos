@@ -6,6 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.enums import VideoStatus
 from app.schemas.types import UtcDateTime
 
 
@@ -17,13 +18,21 @@ class ArticleRead(BaseModel):
     id: int
     title: str
     content: str
+    summary: Optional[str] = Field(
+        default=None, description="Resumen corto para la portada (Fase 2)."
+    )
     category: str
     language: str = Field(description="Codigo ISO-639-1 del idioma del articulo.")
     image_url: Optional[str] = None
     video_url: Optional[str] = Field(
         default=None,
-        description="Animacion generada. Nulo mientras la Fase 2 no exista.",
+        description="Animacion generada; nulo mientras el video no este listo.",
     )
     source_url: Optional[str] = None
+    source_name: Optional[str] = None
+    video_status: VideoStatus = Field(
+        default=VideoStatus.NOT_REQUESTED,
+        description="Estado de la animacion: permite al cliente mostrar un aviso.",
+    )
     published_at: UtcDateTime
     position: int

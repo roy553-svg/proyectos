@@ -1,5 +1,11 @@
 """Schemas (DTOs) expuestos por la API."""
 
+from app.schemas.admin import (
+    IntegrationsStatusRead,
+    PipelineRunRead,
+    PipelineRunRequest,
+    VideoRefreshRead,
+)
 from app.schemas.article import ArticleRead
 from app.schemas.common import ErrorResponse, HealthResponse
 from app.schemas.edition import EditionRead
@@ -11,6 +17,10 @@ __all__ = [
     "EditionRead",
     "ErrorResponse",
     "HealthResponse",
+    "IntegrationsStatusRead",
     "NewsFeedResponse",
+    "PipelineRunRead",
+    "PipelineRunRequest",
     "UserPreferencesRead",
+    "VideoRefreshRead",
 ]

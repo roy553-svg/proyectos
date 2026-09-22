@@ -12,6 +12,14 @@ import os
 # tocar la base de datos real ni crear ficheros .db.
 os.environ["DATABASE_URL"] = "sqlite://"
 os.environ["CREATE_TABLES_ON_STARTUP"] = "false"
+os.environ["ENABLE_SCHEDULER"] = "false"
+# Los tests que necesitan los endpoints de administracion inyectan su propia
+# configuracion; por defecto quedan deshabilitados aunque el .env local tenga
+# un token.
+os.environ["ADMIN_API_TOKEN"] = ""
+# Ninguna integracion externa activa: los tests nunca deben salir a la red.
+for _external_key in ("NEWSAPI_API_KEY", "GEMINI_API_KEY", "REPLICATE_API_TOKEN"):
+    os.environ[_external_key] = ""
 
 from datetime import date, datetime, time, timedelta, timezone  # noqa: E402
 from typing import Iterator  # noqa: E402
@@ -22,6 +30,7 @@ from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
+from app.core.config import Settings, get_settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
 from app.main import create_app  # noqa: E402
@@ -69,6 +78,38 @@ def client_fixture(db_session: Session) -> Iterator[TestClient]:
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+
+
+ADMIN_TOKEN = "token-de-pruebas"
+
+
+@pytest.fixture(name="admin_settings")
+def admin_settings_fixture() -> Settings:
+    """Configuracion con el token de administracion habilitado."""
+    return Settings(
+        database_url="sqlite://",
+        admin_api_token=ADMIN_TOKEN,
+        create_tables_on_startup=False,
+        news_items_per_edition=3,
+        videos_per_edition=0,
+    )
+
+
+@pytest.fixture(name="admin_client")
+def admin_client_fixture(
+    db_session: Session, admin_settings: Settings
+) -> Iterator[TestClient]:
+    """Cliente con los endpoints /admin habilitados (token de prueba)."""
+    app = create_app()
+
+    def override_get_db() -> Iterator[Session]:
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_settings] = lambda: admin_settings
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

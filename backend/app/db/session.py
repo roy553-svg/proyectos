@@ -2,13 +2,28 @@
 
 from __future__ import annotations
 
+import sqlite3
 from typing import Any, Dict, Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+
+
+@event.listens_for(Engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection: Any, _: Any) -> None:
+    """Activa las claves foraneas en SQLite.
+
+    SQLite las ignora por defecto, de modo que sin este PRAGMA los
+    ``ON DELETE CASCADE`` de los modelos no se aplicarian y quedarian noticias
+    huerfanas. PostgreSQL ya las aplica siempre.
+    """
+    if isinstance(dbapi_connection, sqlite3.Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 def _engine_kwargs() -> Dict[str, Any]:

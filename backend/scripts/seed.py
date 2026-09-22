@@ -25,6 +25,7 @@ from app.models import (
     NewsArticle,
     PublicationStatus,
     UserPreferences,
+    VideoStatus,
     WeeklyEdition,
 )
 
@@ -149,10 +150,11 @@ def seed_editions(db: Session) -> WeeklyEdition:
 
 
 def _demo_articles(week_start: date) -> List[NewsArticle]:
-    """Noticias de demostracion con categorias e idiomas variados."""
+    """Noticias de demostracion con categorias, idiomas y videos variados."""
     return [
         NewsArticle(
             title="Las varitas inteligentes llegan al Callejon Diagon",
+            summary="Ollivander prueba una varita que corrige la pronunciacion.",
             content=(
                 "Un taller de Ollivander presenta un prototipo de varita capaz "
                 "de registrar los hechizos lanzados y sugerir correcciones de "
@@ -163,12 +165,14 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
             image_url="https://cdn.example.com/profeta/varitas.jpg",
             # Animacion ya generada: sirve para probar include_animated_only.
             video_url="https://cdn.example.com/profeta/varitas.mp4",
+            video_status=VideoStatus.READY,
             source_url="https://example.com/noticias/varitas",
             published_at=_at(week_start, 8),
             position=1,
         ),
         NewsArticle(
             title="Descubren una nueva especie de bowtruckle en el bosque de Dean",
+            summary="El ejemplar se camufla entre ramas heladas.",
             content=(
                 "El equipo de magizoologia describe un ejemplar capaz de "
                 "camuflarse entre ramas heladas, lo que abre nuevas preguntas "
@@ -177,13 +181,17 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
             category=ArticleCategory.SCIENCE.value,
             language="es",
             image_url="https://cdn.example.com/profeta/bowtruckle.jpg",
-            video_url=None,  # pendiente de la Fase 2
+            # Animacion encolada pero todavia sin terminar (Fase 2).
+            video_url=None,
+            video_status=VideoStatus.PROCESSING,
+            video_job_id="demo-job-1",
             source_url=None,
             published_at=_at(week_start, 9),
             position=2,
         ),
         NewsArticle(
             title="Las Arpias de Holyhead ganan la liga de quidditch",
+            summary="Remontada en los ultimos diez minutos bajo temporal.",
             content=(
                 "Una remontada en los ultimos diez minutos dio a las Arpias el "
                 "titulo tras capturar la snitch dorada en pleno temporal."
@@ -192,12 +200,14 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
             language="es",
             image_url="https://cdn.example.com/profeta/quidditch.jpg",
             video_url="https://cdn.example.com/profeta/quidditch.mp4",
+            video_status=VideoStatus.READY,
             source_url="https://example.com/noticias/quidditch",
             published_at=_at(week_start, 10),
             position=3,
         ),
         NewsArticle(
             title="El Ministerio revisa la ley de uso de translador",
+            summary="La propuesta crea un registro publico de rutas activas.",
             content=(
                 "La nueva propuesta endurece los permisos para trasladores "
                 "internacionales y crea un registro publico de rutas activas."
@@ -212,6 +222,7 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
         ),
         NewsArticle(
             title="Exposicion de retratos animados en el Museo de Hogsmeade",
+            summary="Sesenta retratos magicos restaurados, entrada libre los martes.",
             content=(
                 "La muestra reune sesenta retratos magicos restaurados y una "
                 "sala dedicada a los cuadros que cambian de marco por la noche."
@@ -226,6 +237,7 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
         ),
         NewsArticle(
             title="Nuevo encantamiento para conservar pociones sin frio",
+            summary="Las pociones curativas aguantan seis meses sin camara fria.",
             content=(
                 "El gremio de pocionistas valida un encantamiento que mantiene "
                 "estables las pociones curativas durante seis meses."
@@ -240,6 +252,7 @@ def _demo_articles(week_start: date) -> List[NewsArticle]:
         ),
         NewsArticle(
             title="Smart wands arrive at Diagon Alley",
+            summary="An English article used to verify the language filter.",
             content=(
                 "An English edition article used to verify that the language "
                 "preference actually filters the feed."
@@ -278,6 +291,7 @@ def main() -> None:
     print(f"  Edicion publicada: id={edition.id} ({edition.week_start} -> {edition.week_end})")
     print(f"  Noticias en base de datos: {total}")
     print("  Usuarios de prueba: 1 (tech/science/magic), 2 (sports), 3 (solo animadas)")
+    print("  Videos: 2 listos, 1 en proceso, el resto sin animacion")
     print("  Prueba: curl 'http://127.0.0.1:8000/api/v1/news?user_id=1'")
 
 

@@ -29,3 +29,23 @@ class ArticleCategory(str, Enum):
     POLITICS = "politics"
     ECONOMY = "economy"
     MAGIC = "magic"
+
+
+class VideoStatus(str, Enum):
+    """Estado de la animacion generada para una noticia (Fase 2)."""
+
+    NOT_REQUESTED = "not_requested"
+    PENDING = "pending"
+    PROCESSING = "processing"
+    READY = "ready"
+    FAILED = "failed"
+
+
+class PipelineStatus(str, Enum):
+    """Resultado de una ejecucion del pipeline semanal (Fase 2)."""
+
+    RUNNING = "running"
+    SUCCESS = "success"
+    PARTIAL = "partial"
+    FAILED = "failed"
+    SKIPPED = "skipped"

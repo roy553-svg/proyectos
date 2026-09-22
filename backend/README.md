@@ -4,9 +4,12 @@ Backend del periódico digital "El Profeta". Expone la **edición semanal public
 filtrada por las **preferencias del usuario** para que la app móvil (Kotlin, Fase 3)
 la consuma sin generar contenido por su cuenta.
 
-> **Alcance:** esta entrega implementa **solo la Fase 1** (modelos, base de datos y
-> API). No hay Gemini, Replicate, NewsAPI, APScheduler, scraping ni código Android.
-> La arquitectura queda preparada para añadirlos en la Fase 2 sin reescribir nada.
+> **Estado:** Fase 1 (modelos, base de datos y API) y Fase 2 (ingesta de
+> noticias, redacción con IA, generación de animaciones y automatización
+> semanal) implementadas. La app Android de la Fase 3 está en `../android/`.
+>
+> **Todas las integraciones externas son opcionales:** sin claves el backend
+> usa adaptadores offline y el pipeline completo sigue siendo ejecutable.
 
 ---
 
@@ -17,8 +20,10 @@ Arquitectura por capas, cada una con una única responsabilidad:
 | Capa | Paquete | Responsabilidad |
 | --- | --- | --- |
 | API | `app/api/` | Routers, validación de parámetros, códigos HTTP |
-| Servicios | `app/services/` | Reglas de negocio (qué edición y qué noticias se devuelven) |
+| Servicios | `app/services/` | Reglas de negocio (feed, pipeline semanal, vídeos) |
 | Acceso a datos | `app/repositories/` | Consultas SQLAlchemy reutilizables |
+| Integraciones | `app/integrations/` | Adaptadores externos (NewsAPI, Gemini, Replicate) y sus respaldos offline |
+| Automatización | `app/scheduler.py` | Trabajos periódicos con APScheduler |
 | Modelos | `app/models/` | Tablas ORM (SQLAlchemy 2.x, `Mapped` / `mapped_column`) |
 | Schemas | `app/schemas/` | DTOs Pydantic de entrada/salida |
 | Configuración | `app/core/` | Ajustes por entorno y excepciones de dominio |
@@ -89,41 +94,49 @@ backend/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py
+│   ├── scheduler.py                 # Fase 2: APScheduler
 │   ├── api/
-│   │   ├── __init__.py
-│   │   ├── deps.py
+│   │   ├── deps.py                  # sesión de BD + guardia del token admin
 │   │   ├── errors.py
 │   │   └── v1/
-│   │       ├── __init__.py
 │   │       ├── router.py
 │   │       └── endpoints/
-│   │           ├── __init__.py
+│   │           ├── admin.py         # Fase 2: pipeline, vídeos, integraciones
 │   │           ├── health.py
 │   │           └── news.py
 │   ├── core/
-│   │   ├── __init__.py
 │   │   ├── config.py
 │   │   └── exceptions.py
 │   ├── db/
-│   │   ├── __init__.py
 │   │   ├── base.py
 │   │   ├── base_class.py
 │   │   ├── init_db.py
 │   │   └── session.py
+│   ├── integrations/                # Fase 2: adaptadores externos
+│   │   ├── base.py                  # puertos (Protocol)
+│   │   ├── errors.py
+│   │   ├── factory.py               # elige adaptador real u offline
+│   │   ├── schemas.py               # dataclasses de intercambio
+│   │   ├── gemini_text_generator.py
+│   │   ├── offline_text_generator.py
+│   │   ├── newsapi_provider.py
+│   │   ├── local_news_provider.py
+│   │   ├── replicate_video_generator.py
+│   │   ├── disabled_video_generator.py
+│   │   └── data/sample_news.json
 │   ├── models/
-│   │   ├── __init__.py
 │   │   ├── enums.py
 │   │   ├── mixins.py
 │   │   ├── news_article.py
+│   │   ├── pipeline_run.py          # Fase 2: auditoría de ejecuciones
 │   │   ├── user_preferences.py
 │   │   └── weekly_edition.py
 │   ├── repositories/
-│   │   ├── __init__.py
 │   │   ├── news_article_repository.py
 │   │   ├── user_preferences_repository.py
 │   │   └── weekly_edition_repository.py
 │   ├── schemas/
-│   │   ├── __init__.py
+│   │   ├── admin.py                 # Fase 2
 │   │   ├── article.py
 │   │   ├── common.py
 │   │   ├── edition.py
@@ -131,22 +144,28 @@ backend/
 │   │   ├── types.py
 │   │   └── user_preferences.py
 │   └── services/
-│       ├── __init__.py
-│       └── news_service.py
+│       ├── news_service.py
+│       ├── pipeline_service.py      # Fase 2: pipeline semanal
+│       └── video_service.py         # Fase 2: seguimiento de animaciones
 ├── migrations/
 │   ├── env.py
 │   ├── script.py.mako
 │   └── versions/
-│       └── 0001_initial_schema.py
+│       ├── 0001_initial_schema.py
+│       └── 0002_phase2_generation_fields.py
 ├── scripts/
-│   ├── __init__.py
 │   └── seed.py
 └── tests/
-    ├── __init__.py
     ├── conftest.py
+    ├── fakes.py                     # dobles de las integraciones
+    ├── test_admin_endpoints.py
     ├── test_app_startup.py
+    ├── test_integrations.py
     ├── test_models_constraints.py
-    └── test_news_endpoint.py
+    ├── test_news_endpoint.py
+    ├── test_pipeline_service.py
+    ├── test_scheduler.py
+    └── test_video_service.py
 ```
 
 ---
@@ -317,11 +336,14 @@ curl -s "http://127.0.0.1:8000/api/v1/news?user_id=1" | python -m json.tool
       "id": 1,
       "title": "Las varitas inteligentes llegan al Callejon Diagon",
       "content": "Un taller de Ollivander presenta un prototipo de varita capaz de registrar los hechizos lanzados y sugerir correcciones de pronunciacion a los magos aprendices.",
+      "summary": "Ollivander prueba una varita que corrige la pronunciacion.",
       "category": "technology",
       "language": "es",
       "image_url": "https://cdn.example.com/profeta/varitas.jpg",
       "video_url": "https://cdn.example.com/profeta/varitas.mp4",
       "source_url": "https://example.com/noticias/varitas",
+      "source_name": "Gaceta Magica",
+      "video_status": "ready",
       "published_at": "2026-09-21T08:00:00Z",
       "position": 1
     },
@@ -329,11 +351,14 @@ curl -s "http://127.0.0.1:8000/api/v1/news?user_id=1" | python -m json.tool
       "id": 2,
       "title": "Descubren una nueva especie de bowtruckle en el bosque de Dean",
       "content": "El equipo de magizoologia describe un ejemplar capaz de camuflarse entre ramas heladas, lo que abre nuevas preguntas sobre su adaptacion al invierno.",
+      "summary": "El ejemplar se camufla entre ramas heladas.",
       "category": "science",
       "language": "es",
       "image_url": "https://cdn.example.com/profeta/bowtruckle.jpg",
       "video_url": null,
       "source_url": null,
+      "source_name": null,
+      "video_status": "processing",
       "published_at": "2026-09-21T09:00:00Z",
       "position": 2
     }
@@ -341,8 +366,9 @@ curl -s "http://127.0.0.1:8000/api/v1/news?user_id=1" | python -m json.tool
 }
 ```
 
-`video_url` es `null` mientras la generación de animaciones (Fase 2) no exista; el
-cliente debe mostrar la imagen estática en ese caso.
+`video_url` es `null` mientras la animación no esté lista; `video_status` dice
+en qué punto está (`not_requested`, `pending`, `processing`, `ready`,
+`failed`). El cliente muestra la imagen estática en todos esos casos.
 
 Respuesta de error (usuario inexistente):
 
@@ -370,24 +396,141 @@ docker run --rm -p 8000:8000 \
 
 ---
 
-## 5. Preparado para la Fase 2 (sin implementar)
+## 5. Fase 2 — Pipeline automático (IA, vídeo y scheduler)
 
-Puntos de extensión que ya existen y que la Fase 2 sólo tendrá que rellenar:
+### 5.1. Qué hace
 
-* `NewsArticle.video_url` y `source_url` ya son nulos → el generador de vídeo sólo
-  tendrá que actualizarlos.
-* `WeeklyEdition.status` permite crear la edición como `draft`, completarla y
-  publicarla en un único paso (`published` + `published_at`).
-* `UserPreferences.extra_preferences` (JSON) admite preferencias nuevas sin migrar.
-* Los repositorios encapsulan todas las consultas: el pipeline automático los
-  reutilizará en vez de escribir SQL propio.
-* Alembic ya está configurado para versionar cualquier campo que la Fase 2 añada.
+Una vez por semana el backend genera la edición él solo:
 
----
+```
+NewsAPI / ejemplos locales   ->  RawNewsItem
+          |
+          v
+Gemini / redactor offline    ->  GeneratedArticle  (título, cuerpo, resumen)
+          |
+          v
+WeeklyEdition (draft) + NewsArticle[]
+          |
+          v
+Replicate (Stable Video Diffusion)  ->  job encolado por noticia
+          |
+          v
+WeeklyEdition (published)    ->  GET /api/v1/news lo sirve
+          |
+          v
+video_refresh (cada N min)   ->  rellena video_url cuando el vídeo está listo
+```
 
-## 6. VERIFICACIÓN DE FASE 1
+### 5.2. Puertos y adaptadores
 
-Checklist de lo implementado:
+`app/integrations/base.py` define tres `Protocol` (`NewsProvider`,
+`TextGenerator`, `VideoGenerator`). `app/integrations/factory.py` elige la
+implementación **según haya o no clave configurada**:
+
+| Punto de integración | Con clave | Sin clave (por defecto) |
+| --- | --- | --- |
+| Noticias | `NewsApiProvider` (NewsAPI) | `LocalNewsProvider` (JSON incluido) |
+| Redacción | `GeminiTextGenerator` (Gemini REST) | `OfflineTextGenerator` (resumen extractivo) |
+| Vídeo | `ReplicateVideoGenerator` (SVD) | `DisabledVideoGenerator` (`video_url` sigue nulo) |
+
+Consecuencias prácticas:
+
+* el proyecto **se ejecuta y se testea entero sin red ni claves**;
+* añadir una credencial no exige tocar código, sólo el `.env`;
+* si la IA falla en una noticia concreta se usa el redactor offline **para esa
+  noticia** y la ejecución se marca como `partial`: una edición incompleta es
+  peor que una edición sin IA;
+* las animaciones son asíncronas: publicar no espera al vídeo, que llega
+  después vía `video_refresh`.
+
+### 5.3. Automatización (APScheduler)
+
+`app/scheduler.py` registra dos trabajos y sólo arranca si
+`ENABLE_SCHEDULER=true`:
+
+| Trabajo | Disparador | Qué hace |
+| --- | --- | --- |
+| `weekly_pipeline` | cron (`WEEKLY_PIPELINE_DAY_OF_WEEK/HOUR/MINUTE`) | genera y publica la edición de la semana |
+| `video_refresh` | cada `VIDEO_POLL_INTERVAL_MINUTES` | actualiza las animaciones pendientes |
+
+Ambos usan `coalesce=True` y `max_instances=1`: si el proceso estuvo caído no
+se acumulan ejecuciones atrasadas ni se solapan dos pipelines.
+
+Cada ejecución se registra en la tabla `pipeline_runs` (estado, disparador,
+noticias descargadas, artículos creados, cuántos escribió la IA, vídeos
+encolados y detalle del error si lo hubo).
+
+### 5.4. Endpoints de administración
+
+Todos exigen la cabecera `X-Admin-Token` (comparada en tiempo constante). Si
+`ADMIN_API_TOKEN` está vacío devuelven **503**: preferimos deshabilitarlos a
+exponerlos abiertos.
+
+| Método y ruta | Descripción |
+| --- | --- |
+| `POST /api/v1/admin/pipeline/run` | Ejecuta el pipeline (body opcional: `week_start`, `publish`, `force`) |
+| `GET /api/v1/admin/pipeline/runs` | Historial de ejecuciones |
+| `POST /api/v1/admin/videos/refresh` | Consulta las animaciones pendientes |
+| `GET /api/v1/admin/integrations` | Adaptadores activos y estado del scheduler |
+
+```bash
+export TOKEN="token-local-de-pruebas"   # el valor de ADMIN_API_TOKEN
+
+curl -s -H "X-Admin-Token: $TOKEN" http://127.0.0.1:8000/api/v1/admin/integrations
+
+curl -s -X POST -H "X-Admin-Token: $TOKEN" -H "Content-Type: application/json" \
+     -d '{"week_start":"2026-09-28","publish":true}' \
+     http://127.0.0.1:8000/api/v1/admin/pipeline/run
+```
+
+Respuesta de una ejecución:
+
+```json
+{
+  "id": 1,
+  "status": "success",
+  "trigger": "manual",
+  "edition_id": 2,
+  "items_fetched": 8,
+  "articles_created": 8,
+  "articles_ai_written": 0,
+  "videos_requested": 0,
+  "started_at": "2026-09-22T13:27:25.858528Z",
+  "finished_at": "2026-09-22T13:27:25.890176Z",
+  "detail": null
+}
+```
+
+Estados posibles: `success`, `partial` (hubo fallos externos pero hay
+edición), `skipped` (esa semana ya estaba publicada), `failed`.
+
+### 5.5. Idempotencia y seguridad del pipeline
+
+* Si la semana **ya tiene una edición publicada**, la ejecución se salta
+  (`skipped`) salvo que se pase `force: true`, que **archiva** la anterior
+  (`status = archived`) para no chocar con el índice único parcial.
+* Si la semana tenía un **borrador**, se borra y se regenera (las noticias se
+  eliminan en cascada).
+* El pipeline nunca lanza excepciones hacia arriba: un fallo externo se
+  registra como `failed` en `pipeline_runs` y el scheduler sigue vivo.
+* Las claves viajan siempre en cabeceras (`x-goog-api-key`, `X-Api-Key`,
+  `Authorization: Token ...`), nunca en la URL, y los mensajes de error no
+  incluyen ni la clave ni la excepción original.
+
+### 5.6. Campos añadidos en la Fase 2
+
+`NewsArticle`: `summary`, `source_name`, `video_status`, `video_job_id`,
+`ai_model`, `updated_at`. Tabla nueva `pipeline_runs`. Migración
+`0002_phase2_generation_fields`, que añade las columnas NOT NULL con
+`server_default` para poder aplicarse sobre datos de la Fase 1.
+
+`video_status` (`not_requested`, `pending`, `processing`, `ready`, `failed`)
+se expone en la API para que la app pueda avisar de que la animación está en
+camino.
+
+## 6. VERIFICACIÓN
+
+### Fase 1 — Backend y base de datos
 
 - [x] Modelos `UserPreferences`, `WeeklyEdition` y `NewsArticle` con sus relaciones.
 - [x] SQLAlchemy 2.x con `Mapped` / `mapped_column`, índices y restricciones.
@@ -402,8 +545,26 @@ Checklist de lo implementado:
 - [x] CORS explícito con lista blanca.
 - [x] Migraciones Alembic (`0001_initial_schema`) verificadas con `alembic check`.
 - [x] Seed sin dependencias externas (`python -m scripts.seed --reset`).
-- [x] 19 tests funcionales con pytest + `TestClient`.
-- [x] Sin dependencias de Gemini, Replicate, NewsAPI, APScheduler ni Android.
+- [x] Tests funcionales con pytest + `TestClient`.
+- [x] La Fase 1 sigue funcionando sin ninguna integración externa activa.
+
+### Fase 2 — IA, vídeo y automatización
+
+- [x] Puertos (`Protocol`) + adaptadores reales y offline para noticias, texto y vídeo.
+- [x] `NewsApiProvider` (NewsAPI) con normalización y descarte de entradas incompletas.
+- [x] `GeminiTextGenerator`: REST `generateContent`, salida JSON forzada por esquema.
+- [x] `ReplicateVideoGenerator`: `submit` + `poll` (Stable Video Diffusion), asíncrono.
+- [x] Respaldos offline para los tres puntos: el pipeline se ejecuta sin claves.
+- [x] `pipeline_service`: descarga → redacción → edición → vídeos → publicación.
+- [x] Degradación por noticia si la IA falla (ejecución `partial`, nunca `500`).
+- [x] Idempotencia semanal (`skipped`), `force` que archiva la edición anterior.
+- [x] `video_service`: rellena `video_url` cuando la animación está lista.
+- [x] APScheduler con cron semanal + polling de vídeos, `coalesce`, `max_instances=1`.
+- [x] Auditoría en `pipeline_runs` y endpoints `/api/v1/admin/*` protegidos por token.
+- [x] Claves sólo en cabeceras y fuera de los mensajes de error.
+- [x] Migración `0002_phase2_generation_fields` aplicable sobre datos existentes.
+- [x] `PRAGMA foreign_keys=ON` en SQLite para que los `ON DELETE CASCADE` se cumplan.
+- [x] 59 tests (pipeline, vídeos, adaptadores con `respx`, scheduler y admin).
 
 Comandos para comprobarlo de principio a fin:
 
@@ -421,7 +582,7 @@ alembic check                     # -> "No new upgrade operations detected."
 python -m scripts.seed --reset    # -> "Seed completado."
 
 # 3) Tests
-pytest                            # -> 19 passed
+pytest                            # -> 59 passed
 
 # 4) API
 uvicorn app.main:app --reload &
@@ -431,4 +592,25 @@ curl -s "http://127.0.0.1:8000/api/v1/news?user_id=2" | python -m json.tool   # 
 curl -s "http://127.0.0.1:8000/api/v1/news?user_id=3" | python -m json.tool   # sólo noticias con video_url
 curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:8000/api/v1/news?user_id=999"  # 404
 curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:8000/api/v1/news?user_id=0"    # 422
+
+# 5) Fase 2: pipeline automático (funciona sin ninguna clave externa)
+export TOKEN="token-local-de-pruebas"   # debe coincidir con ADMIN_API_TOKEN del .env
+curl -s -H "X-Admin-Token: $TOKEN" \
+     http://127.0.0.1:8000/api/v1/admin/integrations | python -m json.tool
+#  -> news_provider=local, text_generator=offline, video_generator=disabled
+
+curl -s -X POST -H "X-Admin-Token: $TOKEN" -H "Content-Type: application/json" \
+     -d '{"week_start":"2026-09-28"}' \
+     http://127.0.0.1:8000/api/v1/admin/pipeline/run | python -m json.tool
+#  -> {"status": "success", "articles_created": 8, ...}
+
+curl -s "http://127.0.0.1:8000/api/v1/news?user_id=1" | python -m json.tool
+#  -> ahora sirve la edición recién generada
+
+curl -s -o /dev/null -w "%{http_code}\n" \
+     -X POST http://127.0.0.1:8000/api/v1/admin/pipeline/run   # 401 sin token
 ```
+
+Para activar la automatización semanal real basta con poner
+`ENABLE_SCHEDULER=true` (y, si se quiere IA y vídeo de verdad, las claves de
+Gemini/Replicate/NewsAPI) en el `.env` y reiniciar el servidor.

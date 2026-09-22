@@ -1,0 +1,74 @@
+[
+  {
+    "title": "Las varitas inteligentes llegan al Callejon Diagon",
+    "summary": "Un taller de Ollivander presenta una varita que registra los hechizos lanzados.",
+    "content": "El taller de Ollivander ha presentado un prototipo de varita capaz de registrar los hechizos lanzados y de sugerir correcciones de pronunciacion a los magos aprendices. El dispositivo, fabricado con nucleo de pluma de fenix, guarda un historial de practica que los profesores pueden revisar.",
+    "category": "technology",
+    "image_url": "https://cdn.example.com/profeta/varitas.jpg",
+    "source_url": "https://example.com/noticias/varitas",
+    "source_name": "Gaceta Magica"
+  },
+  {
+    "title": "Descubren una nueva especie de bowtruckle en el bosque de Dean",
+    "summary": "El ejemplar se camufla entre ramas heladas durante el invierno.",
+    "content": "Un equipo de magizoologia ha descrito un bowtruckle capaz de camuflarse entre ramas heladas, lo que abre nuevas preguntas sobre su adaptacion al invierno. El hallazgo se produjo durante un censo rutinario de criaturas protegidas.",
+    "category": "science",
+    "image_url": "https://cdn.example.com/profeta/bowtruckle.jpg",
+    "source_url": "https://example.com/noticias/bowtruckle",
+    "source_name": "Boletin de Magizoologia"
+  },
+  {
+    "title": "Las Arpias de Holyhead ganan la liga de quidditch",
+    "summary": "Una remontada en los ultimos diez minutos decidio el titulo.",
+    "content": "Las Arpias de Holyhead se proclamaron campeonas tras capturar la snitch dorada en pleno temporal. La remontada llego en los ultimos diez minutos, con dos tantos de su cazadora mas joven.",
+    "category": "sports",
+    "image_url": "https://cdn.example.com/profeta/quidditch.jpg",
+    "source_url": "https://example.com/noticias/quidditch",
+    "source_name": "Quidditch Semanal"
+  },
+  {
+    "title": "El Ministerio revisa la ley de uso de translador",
+    "summary": "La propuesta crea un registro publico de rutas activas.",
+    "content": "El Ministerio ha presentado una propuesta que endurece los permisos para trasladores internacionales y crea un registro publico de rutas activas. Las asociaciones de viajeros piden un periodo de adaptacion mas largo.",
+    "category": "politics",
+    "image_url": "https://cdn.example.com/profeta/ministerio.jpg",
+    "source_url": "https://example.com/noticias/translador",
+    "source_name": "El Profeta"
+  },
+  {
+    "title": "Exposicion de retratos animados en el Museo de Hogsmeade",
+    "summary": "La muestra reune sesenta retratos magicos restaurados.",
+    "content": "El Museo de Hogsmeade inaugura una exposicion con sesenta retratos magicos restaurados y una sala dedicada a los cuadros que cambian de marco por la noche. La entrada sera gratuita los martes.",
+    "category": "culture",
+    "image_url": "https://cdn.example.com/profeta/retratos.jpg",
+    "source_url": "https://example.com/noticias/retratos",
+    "source_name": "Cultura Magica"
+  },
+  {
+    "title": "Nuevo encantamiento para conservar pociones sin frio",
+    "summary": "Mantiene estables las pociones curativas durante seis meses.",
+    "content": "El gremio de pocionistas ha validado un encantamiento que mantiene estables las pociones curativas durante seis meses sin necesidad de camaras frias. San Mungo lo probara en sus almacenes este trimestre.",
+    "category": "magic",
+    "image_url": "https://cdn.example.com/profeta/pociones.jpg",
+    "source_url": "https://example.com/noticias/pociones",
+    "source_name": "Boletin del Gremio"
+  },
+  {
+    "title": "Los duendes de Gringotts revisan sus tipos de interes",
+    "summary": "El banco ajusta las condiciones de las boveda familiares.",
+    "content": "Gringotts ha anunciado una revision de los tipos de interes aplicados a las bovedas familiares. Los duendes aseguran que la medida busca compensar el aumento de los costes de custodia de objetos encantados.",
+    "category": "economy",
+    "image_url": "https://cdn.example.com/profeta/gringotts.jpg",
+    "source_url": "https://example.com/noticias/gringotts",
+    "source_name": "Economia Magica"
+  },
+  {
+    "title": "Hogwarts estrena invernadero para plantas luminiscentes",
+    "summary": "El invernadero numero ocho acogera especies que brillan de noche.",
+    "content": "Hogwarts ha inaugurado su octavo invernadero, dedicado a plantas luminiscentes que solo florecen durante las noches sin luna. Los alumnos de sexto curso participaran en su cuidado.",
+    "category": "science",
+    "image_url": "https://cdn.example.com/profeta/invernadero.jpg",
+    "source_url": "https://example.com/noticias/invernadero",
+    "source_name": "El Profeta"
+  }
+]

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     CheckConstraint,
+    Enum as SAEnum,
     ForeignKey,
     Index,
     String,
@@ -16,7 +17,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
-from app.models.mixins import TimestampMixin
+from app.models.enums import VideoStatus
+from app.models.mixins import TimestampMixin, utcnow
 
 if TYPE_CHECKING:  # pragma: no cover - solo para type checkers
     from app.models.weekly_edition import WeeklyEdition
@@ -51,6 +53,12 @@ class NewsArticle(TimestampMixin, Base):
 
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    summary: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        default=None,
+        nullable=True,
+        doc="Resumen corto para la portada (lo redacta la IA en la Fase 2).",
+    )
 
     category: Mapped[str] = mapped_column(
         String(60),
@@ -78,10 +86,43 @@ class NewsArticle(TimestampMixin, Base):
     source_url: Mapped[Optional[str]] = mapped_column(
         String(1000), default=None, nullable=True, doc="Fuente original de la noticia."
     )
+    source_name: Mapped[Optional[str]] = mapped_column(
+        String(200), default=None, nullable=True, doc="Medio del que procede la noticia."
+    )
+
+    # --- Fase 2: trazabilidad de la generacion automatica -----------------
+    video_status: Mapped[VideoStatus] = mapped_column(
+        SAEnum(
+            VideoStatus,
+            name="video_status",
+            native_enum=False,
+            length=20,
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
+        ),
+        default=VideoStatus.NOT_REQUESTED,
+        nullable=False,
+        index=True,
+        doc="Estado del trabajo de animacion en el proveedor de video.",
+    )
+    video_job_id: Mapped[Optional[str]] = mapped_column(
+        String(200),
+        default=None,
+        nullable=True,
+        doc="Identificador del trabajo en el proveedor (p. ej. Replicate).",
+    )
+    ai_model: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        default=None,
+        nullable=True,
+        doc="Modelo que redacto el texto; nulo si lo escribio una persona.",
+    )
 
     published_at: Mapped[datetime] = mapped_column(nullable=False, index=True)
     position: Mapped[int] = mapped_column(
         default=1, nullable=False, doc="Orden de aparicion dentro de la edicion."
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=utcnow, onupdate=utcnow, nullable=False
     )
 
     edition: Mapped["WeeklyEdition"] = relationship(back_populates="articles")

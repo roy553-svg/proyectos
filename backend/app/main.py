@@ -15,20 +15,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.errors import register_exception_handlers
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.scheduler import shutdown_scheduler, start_scheduler
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Prepara la base de datos al arrancar si asi se configura.
+    """Prepara la base de datos y la automatizacion semanal.
 
     En produccion se recomienda ``CREATE_TABLES_ON_STARTUP=false`` y aplicar
-    las migraciones con ``alembic upgrade head``.
+    las migraciones con ``alembic upgrade head``. El scheduler (Fase 2) solo
+    arranca si ``ENABLE_SCHEDULER=true``.
     """
     if settings.create_tables_on_startup:
         from app.db.init_db import create_tables
 
         create_tables()
-    yield
+
+    start_scheduler(settings)
+    try:
+        yield
+    finally:
+        shutdown_scheduler()
 
 
 def create_app() -> FastAPI:
@@ -37,8 +44,9 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version=settings.app_version,
         description=(
-            "Backend de 'El Profeta': entrega la edicion semanal publicada "
-            "filtrada por las preferencias del usuario."
+            "Backend de 'El Profeta': genera cada semana una edicion con "
+            "noticias redactadas por IA y animaciones, y la entrega filtrada "
+            "por las preferencias del usuario."
         ),
         docs_url="/docs",
         redoc_url="/redoc",
@@ -53,7 +61,7 @@ def create_app() -> FastAPI:
             CORSMiddleware,
             allow_origins=cors_origins,
             allow_credentials=False,
-            allow_methods=["GET"],
+            allow_methods=["GET", "POST"],
             allow_headers=["*"],
         )
 
