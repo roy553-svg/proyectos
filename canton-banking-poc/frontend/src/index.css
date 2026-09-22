@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-lienzo: #070b14;
+  --color-panel: #0d1424;
+  --color-panel-alto: #131c30;
+  --color-borde: #1e2a43;
+  --color-borde-vivo: #2c3d5e;
+  --color-tinta: #e8eefc;
+  --color-tinta-suave: #97a6c4;
+  --color-tinta-tenue: #6b7a99;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Textura de fondo sutil, para que la proyeccion no se vea plana. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 12% -5%, rgba(34, 211, 238, 0.07), transparent 60%),
+    radial-gradient(800px 500px at 88% 0%, rgba(167, 139, 250, 0.07), transparent 60%);
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.aparecer {
+  animation: aparecer 0.35s ease-out both;
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+.latido {
+  animation: latido 1.8s ease-in-out infinite;
+}
+
+/* Barras de "datos no entregados a este nodo". */
+.opaco {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.09) 0px,
+    rgba(148, 163, 184, 0.09) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #223050; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #2e4066; }
