@@ -1,0 +1,12 @@
+# --- Runtime (Fase 1) ---
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0,<3.0
+pydantic>=2.7,<3.0
+pydantic-settings>=2.3,<3.0
+python-dotenv>=1.0
+alembic>=1.13
+
+# --- PostgreSQL (produccion) ---
+# Descomentar al desplegar con DATABASE_URL=postgresql+psycopg://...
+# psycopg[binary]>=3.1
