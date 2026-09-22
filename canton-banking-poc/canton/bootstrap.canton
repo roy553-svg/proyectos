@@ -1,0 +1,115 @@
+/* ============================================================================
+ *  bootstrap.canton  -  Puesta en marcha del sincronizador y de los bancos
+ *
+ *  Se ejecuta con:
+ *      canton -c canton.conf --bootstrap canton/bootstrap.canton
+ *
+ *  Deja la red lista para la demo: sincronizador arrancado, cuatro nodos
+ *  participantes conectados, DAR desplegado y las cuatro identidades
+ *  bancarias asignadas, cada una en SU PROPIO nodo.
+ * ========================================================================== */
+
+import com.digitalasset.canton.config.RequireTypes.PositiveInt
+import com.digitalasset.canton.version.ProtocolVersion
+
+val nombreSincronizador = "interbancario"
+
+// ---------------------------------------------------------------------------
+// 1. Arranque del sincronizador (secuenciador + mediador)
+// ---------------------------------------------------------------------------
+bootstrap.synchronizer(
+  synchronizerName = nombreSincronizador,
+  sequencers = Seq(sequencerInterbancario),
+  mediators = Seq(mediadorInterbancario),
+  synchronizerOwners = Seq(sequencerInterbancario),
+  synchronizerThreshold = PositiveInt.one,
+  staticSynchronizerParameters =
+    StaticSynchronizerParameters.defaultsWithoutKMS(ProtocolVersion.latest),
+)
+
+// ---------------------------------------------------------------------------
+// 2. Cada banco conecta SU nodo al sincronizador
+// ---------------------------------------------------------------------------
+val bancos = Seq(bancoAlfa, bancoBeta, bancoGamma, bancoCentral)
+
+bancos.foreach { participante =>
+  participante.synchronizers.connect_local(
+    sequencerInterbancario,
+    alias = nombreSincronizador,
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 3. Despliegue del modelo Daml en cada participante
+// ---------------------------------------------------------------------------
+val dar = "./.daml/dist/canton-banking-poc-1.0.0.dar"
+
+bancos.foreach { participante =>
+  participante.dars.upload(dar)
+}
+
+// ---------------------------------------------------------------------------
+// 4. Identidades: cada Party se aloja en el nodo de su propia institucion.
+//    Esta es la raiz de la segregacion: la clave privada que autoriza los
+//    movimientos de Alfa vive unicamente en el nodo de Alfa.
+// ---------------------------------------------------------------------------
+// `toProtoPrimitive` da el identificador COMPLETO (hint::huella-de-clave);
+// el `toString` de la consola lo abrevia y no sirve para conectarse.
+val alfa    = bancoAlfa.parties.enable("BancoAlfa").toProtoPrimitive
+val beta    = bancoBeta.parties.enable("BancoBeta").toProtoPrimitive
+val gamma   = bancoGamma.parties.enable("BancoGamma").toProtoPrimitive
+val central = bancoCentral.parties.enable("BancoCentral").toProtoPrimitive
+
+// ---------------------------------------------------------------------------
+// 5. Ficheros de conexion para Daml Script y para el frontend.
+//    Los identificadores de Party incluyen la huella de la clave del nodo, que
+//    cambia en cada arranque, asi que se generan aqui en lugar de fijarlos.
+// ---------------------------------------------------------------------------
+import java.nio.file.{Files, Paths}
+import java.nio.charset.StandardCharsets.UTF_8
+
+val partiesJson =
+  s"""{
+     |  "bancoAlfa": "$alfa",
+     |  "bancoBeta": "$beta",
+     |  "bancoGamma": "$gamma",
+     |  "bancoCentral": "$central"
+     |}
+     |""".stripMargin
+
+val participantsJson =
+  s"""{
+     |  "default_participant": { "host": "localhost", "port": 5011 },
+     |  "participants": {
+     |    "nodoAlfa":    { "host": "localhost", "port": 5011 },
+     |    "nodoBeta":    { "host": "localhost", "port": 5021 },
+     |    "nodoGamma":   { "host": "localhost", "port": 5031 },
+     |    "nodoCentral": { "host": "localhost", "port": 5041 }
+     |  },
+     |  "party_participants": {
+     |    "$alfa": "nodoAlfa",
+     |    "$beta": "nodoBeta",
+     |    "$gamma": "nodoGamma",
+     |    "$central": "nodoCentral"
+     |  }
+     |}
+     |""".stripMargin
+
+Files.write(Paths.get("canton/parties.json"), partiesJson.getBytes(UTF_8))
+Files.write(Paths.get("canton/participants.json"), participantsJson.getBytes(UTF_8))
+
+println("")
+println("===========================================================")
+println(" Red interbancaria Canton lista")
+println("===========================================================")
+println(s" Sincronizador : $nombreSincronizador")
+println(s" Banco Alfa    : $alfa")
+println(s"                 ledger-api 5011 | json-api 5013")
+println(s" Banco Beta    : $beta")
+println(s"                 ledger-api 5021 | json-api 5023")
+println(s" Banco Gamma   : $gamma")
+println(s"                 ledger-api 5031 | json-api 5033")
+println(s" Banco Central : $central")
+println(s"                 ledger-api 5041 | json-api 5043")
+println("===========================================================")
+println("")

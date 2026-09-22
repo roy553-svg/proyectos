@@ -5,3 +5,5 @@ frontend/dist/
 *.dar
 canton-log/
 log/
+canton/parties.json
+canton/participants.json

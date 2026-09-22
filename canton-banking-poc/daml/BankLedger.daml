@@ -578,9 +578,15 @@ setupParties = do
 -- | Onboarding: cada banco emite su licencia y abre su cuenta nostro en USD.
 --   El Banco Central queda como observador de las tres instituciones.
 setupLedger : Script DemoLedger
-setupLedger = do
-  parties@DemoParties{..} <- setupParties
-  let auditores = [bancoCentral]
+setupLedger = setupParties >>= setupLedgerFor
+
+-- | Variante del onboarding sobre identidades YA existentes. Es la que se usa
+--   contra una red Canton real, donde cada Party fue creada previamente en el
+--   nodo participante de su institucion.
+setupLedgerFor : DemoParties -> Script DemoLedger
+setupLedgerFor parties = do
+  let DemoParties{..} = parties
+      auditores = [bancoCentral]
 
   licenciaAlfa <- submit bancoAlfa $ createCmd BankLicense with
     bank = bancoAlfa
@@ -628,8 +634,18 @@ setupLedger = do
 --   internos segregados -> liquidacion interbancaria bilateral -> verificacion
 --   de privacidad -> auditoria regulatoria -> controles negativos.
 demoCompleta : Script ()
-demoCompleta = do
-  DemoLedger{..} <- setupLedger
+demoCompleta = setupParties >>= demoCompletaCon
+
+-- | Punto de entrada para ejecutar la demo contra una red Canton REAL, con las
+--   identidades ya asignadas en sus respectivos nodos participantes. Se invoca
+--   con `--input-file canton/parties.json` y `--participant-config`.
+demoEnRedReal : DemoParties -> Script ()
+demoEnRedReal = demoCompletaCon
+
+-- | Cuerpo de la demo, independiente de como se obtuvieron las identidades.
+demoCompletaCon : DemoParties -> Script ()
+demoCompletaCon parties0 = do
+  DemoLedger{..} <- setupLedgerFor parties0
   let DemoParties{..} = parties
       auditores = [bancoCentral]
   t0 <- getTime
