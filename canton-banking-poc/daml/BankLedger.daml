@@ -738,9 +738,10 @@ demoCompletaCon parties0 = do
   betaFinal.balance === 6750000.0
   (alfaFinal.balance + betaFinal.balance) === totalInicial
 
-  -- El valor en transito fue consumido: no quedan importes en limbo.
+  -- El valor en transito fue consumido: no queda importe en limbo.
   transitosVivos <- query @FundsInTransit bancoAlfa
-  length transitosVivos === 0
+  assertMsg "Ha quedado valor en transito sin liquidar"
+    (not (any (\(_, t) -> t.settlementId == "STL-2026-0001") transitosVivos))
 
   -- ---------------------------------------------------------------------------
   -- 3. PRIVACIDAD DE SUB-TRANSACCION (el corazon de la demo).
@@ -748,14 +749,21 @@ demoCompletaCon parties0 = do
 
   -- 3.a El Banco Gamma no participo: su ledger no contiene absolutamente nada
   --     de esta operacion, ni siquiera constancia de que existio.
+  -- Las comprobaciones se expresan sobre la PROPIEDAD y no sobre un conteo
+  -- absoluto, para que sigan siendo validas al reejecutar la demo contra una
+  -- red que ya tiene estado de ejecuciones anteriores.
   gammaVeCuentas   <- query @InstitutionalAccount bancoGamma
   gammaVeAsientos  <- query @TransactionRecord bancoGamma
   gammaVeRecibos   <- query @InterbankSettlementReceipt bancoGamma
   gammaVePropuesta <- query @InterbankTransferProposal bancoGamma
-  length gammaVeCuentas === 1          -- unicamente su propia cuenta nostro
-  length gammaVeAsientos === 0
-  length gammaVeRecibos === 0
-  length gammaVePropuesta === 0
+  assertMsg "FALLO DE PRIVACIDAD: Gamma ve cuentas de otra institucion"
+    (all (\(_, c) -> c.bank == bancoGamma) gammaVeCuentas)
+  assertMsg "FALLO DE PRIVACIDAD: Gamma ve asientos de otra institucion"
+    (all (\(_, a) -> a.bank == bancoGamma) gammaVeAsientos)
+  assertMsg "FALLO DE PRIVACIDAD: Gamma ve recibos de liquidacion ajenos"
+    (null gammaVeRecibos)
+  assertMsg "FALLO DE PRIVACIDAD: Gamma ve propuestas de transferencia ajenas"
+    (null gammaVePropuesta)
 
   -- 3.b Gamma no puede leer la cuenta de Alfa ni conociendo su identificador:
   --     el participante de Gamma sencillamente no tiene el payload.
@@ -794,8 +802,10 @@ demoCompletaCon parties0 = do
   centralVeCuentas  <- query @InstitutionalAccount bancoCentral
   centralVeAsientos <- query @TransactionRecord bancoCentral
   centralVeRecibos  <- query @InterbankSettlementReceipt bancoCentral
-  length centralVeCuentas === 3   -- las tres instituciones supervisadas
-  length centralVeRecibos === 1
+  assertMsg "El regulador deberia ver las cuentas de las tres instituciones"
+    (length centralVeCuentas >= 3)
+  assertMsg "El regulador deberia ver el recibo de esta liquidacion"
+    (any (\(_, r) -> r.settlementId == "STL-2026-0001") centralVeRecibos)
   assertMsg "El regulador deberia ver los asientos de ambos libros"
     (length centralVeAsientos >= 5)
   assertMsg "El regulador deberia ver asientos de mas de una institucion"

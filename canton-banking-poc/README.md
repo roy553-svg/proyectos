@@ -78,6 +78,15 @@ daml test                       # ejecuta las siete verificaciones formales
 ./scripts/ejecutar-demo.sh      # opera sobre la red real y comprueba privacidad
 ```
 
+`ejecutar-demo.sh` puede repetirse sobre la misma red: cada ejecución abre un
+juego nuevo de libros, así que los conteos crecen, y las comprobaciones de
+privacidad se expresan como propiedades ("todo lo que ve Gamma es suyo") y no
+como números fijos, de modo que siguen siendo válidas.
+
+Si modifica el modelo, **reinicie la red** antes de volver a ejecutar: desde
+Daml 3.3 un participante rechaza dos paquetes con el mismo nombre y versión, de
+forma que un DAR recompilado no puede sustituir al ya desplegado.
+
 ### La interfaz ejecutiva
 
 ```bash
