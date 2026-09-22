@@ -82,3 +82,13 @@ publish/
 # Desktop files
 **/desktop.ini
 **/NET.ini
+
+# Android / Gradle (proyecto navegacion-ar-plazas)
+navegacion-ar-plazas/.gradle/
+navegacion-ar-plazas/build/
+navegacion-ar-plazas/*/build/
+navegacion-ar-plazas/local.properties
+navegacion-ar-plazas/.idea/
+navegacion-ar-plazas/*.iml
+navegacion-ar-plazas/captures/
+navegacion-ar-plazas/app/release/

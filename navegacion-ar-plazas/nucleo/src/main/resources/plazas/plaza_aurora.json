@@ -1,0 +1,1544 @@
+{
+  "id": "plaza_aurora",
+  "nombre": "Plaza Aurora",
+  "ciudad": "Ciudad Demo",
+  "ficticia": true,
+  "pisos": [
+    {
+      "id": "p1",
+      "nivel": 1,
+      "nombre": "Piso 1",
+      "anchoMetros": 80.0,
+      "altoMetros": 50.0,
+      "rumboNorteGrados": 12.0,
+      "planoImagen": null,
+      "pasillos": [
+        {
+          "x": 5.0,
+          "y": 22.0,
+          "ancho": 71.0,
+          "alto": 6.0,
+          "etiqueta": "Pasillo principal"
+        },
+        {
+          "x": 37.0,
+          "y": 4.0,
+          "ancho": 6.0,
+          "alto": 43.0,
+          "etiqueta": "Pasillo central"
+        },
+        {
+          "x": 28.0,
+          "y": 43.0,
+          "ancho": 24.0,
+          "alto": 4.0,
+          "etiqueta": "Pasillo de servicios"
+        }
+      ],
+      "locales": [
+        {
+          "x": 5.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Moda Lumen"
+        },
+        {
+          "x": 17.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Tecno Órbita"
+        },
+        {
+          "x": 27.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Deportes Vértice"
+        },
+        {
+          "x": 43.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Joyería Solsticio"
+        },
+        {
+          "x": 53.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Óptica Cenit"
+        },
+        {
+          "x": 65.0,
+          "y": 28.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Café Aurora"
+        },
+        {
+          "x": 5.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Zapatos Nómada"
+        },
+        {
+          "x": 17.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Libros Arena"
+        },
+        {
+          "x": 27.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Farmacia Aurora"
+        },
+        {
+          "x": 43.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Cajero Banco Norte"
+        },
+        {
+          "x": 53.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Perfumería Luna"
+        },
+        {
+          "x": 65.0,
+          "y": 6.0,
+          "ancho": 10.0,
+          "alto": 16.0,
+          "etiqueta": "Pizzería Brasa"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "nivel": 2,
+      "nombre": "Piso 2",
+      "anchoMetros": 80.0,
+      "altoMetros": 50.0,
+      "rumboNorteGrados": 12.0,
+      "planoImagen": null,
+      "pasillos": [
+        {
+          "x": 5.0,
+          "y": 22.0,
+          "ancho": 71.0,
+          "alto": 6.0,
+          "etiqueta": "Pasillo principal"
+        },
+        {
+          "x": 37.0,
+          "y": 4.0,
+          "ancho": 6.0,
+          "alto": 43.0,
+          "etiqueta": "Pasillo central"
+        },
+        {
+          "x": 28.0,
+          "y": 43.0,
+          "ancho": 24.0,
+          "alto": 4.0,
+          "etiqueta": "Pasillo de servicios"
+        }
+      ],
+      "locales": [
+        {
+          "x": 6.0,
+          "y": 28.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Juguetes Cometa"
+        },
+        {
+          "x": 20.0,
+          "y": 28.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Hogar Ámbar"
+        },
+        {
+          "x": 46.0,
+          "y": 28.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Mascotas Patitas"
+        },
+        {
+          "x": 60.0,
+          "y": 28.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Sushi Koi"
+        },
+        {
+          "x": 6.0,
+          "y": 6.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Heladería Nube"
+        },
+        {
+          "x": 20.0,
+          "y": 6.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Tacos El Faro"
+        },
+        {
+          "x": 46.0,
+          "y": 6.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Farmacia Central"
+        },
+        {
+          "x": 60.0,
+          "y": 6.0,
+          "ancho": 12.0,
+          "alto": 16.0,
+          "etiqueta": "Cajero Banco Sur"
+        }
+      ]
+    }
+  ],
+  "establecimientos": [
+    {
+      "id": "est_moda_lumen",
+      "nombre": "Moda Lumen",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 10.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_moda_lumen",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_tecno_orbita",
+      "nombre": "Tecno Órbita",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 22.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_tecno_orbita",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_deportes_vertice",
+      "nombre": "Deportes Vértice",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 32.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_deportes_verti",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_joyeria_solsticio",
+      "nombre": "Joyería Solsticio",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 48.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_joyeria_solsti",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_optica_cenit",
+      "nombre": "Óptica Cenit",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 58.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_optica_cenit",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_cafe_aurora",
+      "nombre": "Café Aurora",
+      "categoria": "RESTAURANTE",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 70.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P1_A_cafe_aurora",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_zapatos_nomada",
+      "nombre": "Zapatos Nómada",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 10.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_zapatos_nomada",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_libros_arena",
+      "nombre": "Libros Arena",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 22.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_libros_arena",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_farmacia_aurora",
+      "nombre": "Farmacia Aurora",
+      "categoria": "FARMACIA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 32.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_farmacia_auror",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_cajero_banco_norte",
+      "nombre": "Cajero Banco Norte",
+      "categoria": "CAJERO",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 48.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_cajero_banco_n",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_perfumeria_luna",
+      "nombre": "Perfumería Luna",
+      "categoria": "TIENDA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 58.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_perfumeria_lun",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_pizzeria_brasa",
+      "nombre": "Pizzería Brasa",
+      "categoria": "RESTAURANTE",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 70.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P1_A_pizzeria_brasa",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_banos_piso_1",
+      "nombre": "Baños Piso 1",
+      "categoria": "BANO",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 28.0,
+        "y": 47.0
+      },
+      "nodoDestinoId": "P1_A_bano",
+      "activo": true,
+      "descripcion": "Baños de hombres, mujeres y accesible"
+    },
+    {
+      "id": "est_ascensor_piso_1",
+      "nombre": "Ascensor Piso 1",
+      "categoria": "ASCENSOR",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 47.5
+      },
+      "nodoDestinoId": "P1_A_ascensor",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_escalera_piso_1",
+      "nombre": "Escalera Piso 1",
+      "categoria": "ESCALERA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 50.0,
+        "y": 47.5
+      },
+      "nodoDestinoId": "P1_A_escalera",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_juguetes_cometa",
+      "nombre": "Juguetes Cometa",
+      "categoria": "TIENDA",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 12.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P2_A_juguetes_comet",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_hogar_ambar",
+      "nombre": "Hogar Ámbar",
+      "categoria": "TIENDA",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 26.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P2_A_hogar_ambar",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_mascotas_patitas",
+      "nombre": "Mascotas Patitas",
+      "categoria": "TIENDA",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 52.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P2_A_mascotas_patit",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_sushi_koi",
+      "nombre": "Sushi Koi",
+      "categoria": "RESTAURANTE",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 66.0,
+        "y": 36.0
+      },
+      "nodoDestinoId": "P2_A_sushi_koi",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_heladeria_nube",
+      "nombre": "Heladería Nube",
+      "categoria": "RESTAURANTE",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 12.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P2_A_heladeria_nube",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_tacos_el_faro",
+      "nombre": "Tacos El Faro",
+      "categoria": "RESTAURANTE",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 26.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P2_A_tacos_el_faro",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_farmacia_central",
+      "nombre": "Farmacia Central",
+      "categoria": "FARMACIA",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 52.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P2_A_farmacia_centr",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_cajero_banco_sur",
+      "nombre": "Cajero Banco Sur",
+      "categoria": "CAJERO",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 66.0,
+        "y": 14.0
+      },
+      "nodoDestinoId": "P2_A_cajero_banco_s",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_banos_piso_2",
+      "nombre": "Baños Piso 2",
+      "categoria": "BANO",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 28.0,
+        "y": 47.0
+      },
+      "nodoDestinoId": "P2_A_bano",
+      "activo": true,
+      "descripcion": "Baños de hombres, mujeres y accesible"
+    },
+    {
+      "id": "est_ascensor_piso_2",
+      "nombre": "Ascensor Piso 2",
+      "categoria": "ASCENSOR",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 47.5
+      },
+      "nodoDestinoId": "P2_A_ascensor",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_escalera_piso_2",
+      "nombre": "Escalera Piso 2",
+      "categoria": "ESCALERA",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 50.0,
+        "y": 47.5
+      },
+      "nodoDestinoId": "P2_A_escalera",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_entrada_sur",
+      "nombre": "Entrada Sur",
+      "categoria": "ENTRADA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 1.0
+      },
+      "nodoDestinoId": "P1_ENT_SUR",
+      "activo": true,
+      "descripcion": null
+    },
+    {
+      "id": "est_entrada_este",
+      "nombre": "Entrada Este",
+      "categoria": "ENTRADA",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 79.5,
+        "y": 25.0
+      },
+      "nodoDestinoId": "P1_ENT_ESTE",
+      "activo": true,
+      "descripcion": null
+    }
+  ],
+  "nodos": [
+    {
+      "id": "P1_A_moda_lumen",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 10.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Moda Lumen"
+    },
+    {
+      "id": "P1_A_tecno_orbita",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 22.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Tecno Órbita"
+    },
+    {
+      "id": "P1_A_deportes_verti",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 32.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Deportes Vértice"
+    },
+    {
+      "id": "P1_A_joyeria_solsti",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 48.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Joyería Solsticio"
+    },
+    {
+      "id": "P1_A_optica_cenit",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 58.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Óptica Cenit"
+    },
+    {
+      "id": "P1_A_cafe_aurora",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 70.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Café Aurora"
+    },
+    {
+      "id": "P1_A_zapatos_nomada",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 10.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Zapatos Nómada"
+    },
+    {
+      "id": "P1_A_libros_arena",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Libros Arena"
+    },
+    {
+      "id": "P1_A_farmacia_auror",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 32.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Farmacia Aurora"
+    },
+    {
+      "id": "P1_A_cajero_banco_n",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 48.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Cajero Banco Norte"
+    },
+    {
+      "id": "P1_A_perfumeria_lun",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 58.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Perfumería Luna"
+    },
+    {
+      "id": "P1_A_pizzeria_brasa",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 70.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Pizzería Brasa"
+    },
+    {
+      "id": "P1_P06",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 6.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P10",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 10.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P22",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 22.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P32",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 32.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P40",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P48",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 48.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P58",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 58.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P70",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 70.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_P76",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 76.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_C05",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 5.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_C14",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 14.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_C36",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 36.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_C45",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 45.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P1_A_bano",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 30.0,
+        "y": 45.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Baños"
+    },
+    {
+      "id": "P1_A_ascensor",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 46.5
+      },
+      "tipo": "ASCENSOR",
+      "nombre": "Ascensor"
+    },
+    {
+      "id": "P1_A_escalera",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 50.0,
+        "y": 45.0
+      },
+      "tipo": "ESCALERA",
+      "nombre": "Escalera"
+    },
+    {
+      "id": "P2_A_juguetes_comet",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 12.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Juguetes Cometa"
+    },
+    {
+      "id": "P2_A_hogar_ambar",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 26.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Hogar Ámbar"
+    },
+    {
+      "id": "P2_A_mascotas_patit",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 52.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Mascotas Patitas"
+    },
+    {
+      "id": "P2_A_sushi_koi",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 66.0,
+        "y": 28.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Sushi Koi"
+    },
+    {
+      "id": "P2_A_heladeria_nube",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 12.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Heladería Nube"
+    },
+    {
+      "id": "P2_A_tacos_el_faro",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 26.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Tacos El Faro"
+    },
+    {
+      "id": "P2_A_farmacia_centr",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 52.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Farmacia Central"
+    },
+    {
+      "id": "P2_A_cajero_banco_s",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 66.0,
+        "y": 22.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Puerta de Cajero Banco Sur"
+    },
+    {
+      "id": "P2_P06",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 6.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P12",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 12.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P26",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 26.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P40",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P52",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 52.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P66",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 66.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_P76",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 76.0,
+        "y": 25.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_C05",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 5.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_C14",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 14.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_C36",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 36.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_C45",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 45.0
+      },
+      "tipo": "PASILLO",
+      "nombre": null
+    },
+    {
+      "id": "P2_A_bano",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 30.0,
+        "y": 45.0
+      },
+      "tipo": "ACCESO",
+      "nombre": "Baños"
+    },
+    {
+      "id": "P2_A_ascensor",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 40.0,
+        "y": 46.5
+      },
+      "tipo": "ASCENSOR",
+      "nombre": "Ascensor"
+    },
+    {
+      "id": "P2_A_escalera",
+      "pisoId": "p2",
+      "posicion": {
+        "x": 50.0,
+        "y": 45.0
+      },
+      "tipo": "ESCALERA",
+      "nombre": "Escalera"
+    },
+    {
+      "id": "P1_ENT_SUR",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 40.0,
+        "y": 2.0
+      },
+      "tipo": "ENTRADA",
+      "nombre": "Entrada Sur"
+    },
+    {
+      "id": "P1_ENT_ESTE",
+      "pisoId": "p1",
+      "posicion": {
+        "x": 79.0,
+        "y": 25.0
+      },
+      "tipo": "ENTRADA",
+      "nombre": "Entrada Este"
+    }
+  ],
+  "aristas": [
+    {
+      "desdeId": "P1_P06",
+      "hastaId": "P1_P10",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P10",
+      "hastaId": "P1_P22",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P22",
+      "hastaId": "P1_P32",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P32",
+      "hastaId": "P1_P40",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P40",
+      "hastaId": "P1_P48",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P48",
+      "hastaId": "P1_P58",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P58",
+      "hastaId": "P1_P70",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P70",
+      "hastaId": "P1_P76",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_moda_lumen",
+      "hastaId": "P1_P10",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_tecno_orbita",
+      "hastaId": "P1_P22",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_deportes_verti",
+      "hastaId": "P1_P32",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_joyeria_solsti",
+      "hastaId": "P1_P48",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_optica_cenit",
+      "hastaId": "P1_P58",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_cafe_aurora",
+      "hastaId": "P1_P70",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_zapatos_nomada",
+      "hastaId": "P1_P10",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_libros_arena",
+      "hastaId": "P1_P22",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_farmacia_auror",
+      "hastaId": "P1_P32",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_cajero_banco_n",
+      "hastaId": "P1_P48",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_perfumeria_lun",
+      "hastaId": "P1_P58",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_pizzeria_brasa",
+      "hastaId": "P1_P70",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_C05",
+      "hastaId": "P1_C14",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_C14",
+      "hastaId": "P1_P40",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_P40",
+      "hastaId": "P1_C36",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_C36",
+      "hastaId": "P1_C45",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_bano",
+      "hastaId": "P1_C45",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_C45",
+      "hastaId": "P1_A_ascensor",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_C45",
+      "hastaId": "P1_A_escalera",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P06",
+      "hastaId": "P2_P12",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P12",
+      "hastaId": "P2_P26",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P26",
+      "hastaId": "P2_P40",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P40",
+      "hastaId": "P2_P52",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P52",
+      "hastaId": "P2_P66",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P66",
+      "hastaId": "P2_P76",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_juguetes_comet",
+      "hastaId": "P2_P12",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_hogar_ambar",
+      "hastaId": "P2_P26",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_mascotas_patit",
+      "hastaId": "P2_P52",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_sushi_koi",
+      "hastaId": "P2_P66",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_heladeria_nube",
+      "hastaId": "P2_P12",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_tacos_el_faro",
+      "hastaId": "P2_P26",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_farmacia_centr",
+      "hastaId": "P2_P52",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_cajero_banco_s",
+      "hastaId": "P2_P66",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_C05",
+      "hastaId": "P2_C14",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_C14",
+      "hastaId": "P2_P40",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_P40",
+      "hastaId": "P2_C36",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_C36",
+      "hastaId": "P2_C45",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_A_bano",
+      "hastaId": "P2_C45",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_C45",
+      "hastaId": "P2_A_ascensor",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P2_C45",
+      "hastaId": "P2_A_escalera",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_ENT_SUR",
+      "hastaId": "P1_C05",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_ENT_ESTE",
+      "hastaId": "P1_P76",
+      "tipo": "PASILLO",
+      "bidireccional": true,
+      "costeExtraMetros": 0.0
+    },
+    {
+      "desdeId": "P1_A_ascensor",
+      "hastaId": "P2_A_ascensor",
+      "tipo": "ASCENSOR",
+      "bidireccional": true,
+      "costeExtraMetros": 18.0
+    },
+    {
+      "desdeId": "P1_A_escalera",
+      "hastaId": "P2_A_escalera",
+      "tipo": "ESCALERA",
+      "bidireccional": true,
+      "costeExtraMetros": 26.0
+    }
+  ],
+  "puntosQr": [
+    {
+      "codigo": "QR_001",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p1",
+      "nodoId": "P1_ENT_SUR",
+      "posicion": {
+        "x": 40.0,
+        "y": 2.0
+      },
+      "rumboGrados": 0.0,
+      "descripcion": "Entrada Sur - mirando al interior"
+    },
+    {
+      "codigo": "QR_002",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p1",
+      "nodoId": "P1_ENT_ESTE",
+      "posicion": {
+        "x": 79.0,
+        "y": 25.0
+      },
+      "rumboGrados": 270.0,
+      "descripcion": "Entrada Este - mirando al interior"
+    },
+    {
+      "codigo": "QR_003",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p1",
+      "nodoId": "P1_P40",
+      "posicion": {
+        "x": 40.0,
+        "y": 25.0
+      },
+      "rumboGrados": 0.0,
+      "descripcion": "Piso 1 - cruce del pasillo central"
+    },
+    {
+      "codigo": "QR_004",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p1",
+      "nodoId": "P1_A_ascensor",
+      "posicion": {
+        "x": 40.0,
+        "y": 46.5
+      },
+      "rumboGrados": 180.0,
+      "descripcion": "Piso 1 - junto al ascensor"
+    },
+    {
+      "codigo": "QR_005",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p2",
+      "nodoId": "P2_A_ascensor",
+      "posicion": {
+        "x": 40.0,
+        "y": 46.5
+      },
+      "rumboGrados": 180.0,
+      "descripcion": "Piso 2 - junto al ascensor"
+    },
+    {
+      "codigo": "QR_006",
+      "plazaId": "plaza_aurora",
+      "pisoId": "p2",
+      "nodoId": "P2_P40",
+      "posicion": {
+        "x": 40.0,
+        "y": 25.0
+      },
+      "rumboGrados": 0.0,
+      "descripcion": "Piso 2 - cruce del pasillo central"
+    }
+  ]
+}
