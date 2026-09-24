@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- El color y la tipografia se definen en Compose (ui/tema/Tema.kt).
+         Este tema solo evita el parpadeo de la ventana al arrancar. -->
+    <style name="Theme.Rumbo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/fondo</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

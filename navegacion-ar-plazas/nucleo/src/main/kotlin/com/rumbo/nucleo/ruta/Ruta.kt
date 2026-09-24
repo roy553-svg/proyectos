@@ -48,6 +48,26 @@ data class Ruta(
         return total
     }
 
+    /**
+     * Trozos continuos de la ruta que caen en [pisoId]. Se devuelven por separado
+     * para que el mapa 2D no dibuje una linea recta entre dos tramos unidos por
+     * un ascensor o una escalera.
+     */
+    fun tramosDelPiso(pisoId: String): List<List<Punto2D>> {
+        val tramos = mutableListOf<List<Punto2D>>()
+        var actual = mutableListOf<Punto2D>()
+        for (punto in puntos) {
+            if (punto.pisoId == pisoId) {
+                actual.add(punto.posicion)
+            } else if (actual.isNotEmpty()) {
+                tramos.add(actual)
+                actual = mutableListOf()
+            }
+        }
+        if (actual.isNotEmpty()) tramos.add(actual)
+        return tramos
+    }
+
     /** Indica si entre [indice] - 1 e [indice] hay un cambio de piso. */
     fun esCambioDePiso(indice: Int): Boolean {
         if (indice <= 0 || indice > puntos.lastIndex) return false

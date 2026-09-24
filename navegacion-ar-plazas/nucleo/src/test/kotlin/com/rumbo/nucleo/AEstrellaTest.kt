@@ -128,5 +128,17 @@ class AEstrellaTest {
         assertTrue(ruta.esCambioDePiso(2))
         // La longitud caminada no incluye el salto vertical: 10 + 10 = 20 m
         assertEquals(20.0, ruta.longitudHorizontalMetros, 1e-6)
+
+        // El mapa 2D dibuja un trazo por piso, sin unir los dos lados del ascensor.
+        assertEquals(listOf(listOf("P1_INICIO", "P1_ASC")), tramosComoIds(ruta, "p1"))
+        assertEquals(listOf(listOf("P2_ASC", "P2_DESTINO")), tramosComoIds(ruta, "p2"))
     }
+
+    /** Los tramos se devuelven como posiciones; se traducen a ids para comparar. */
+    private fun tramosComoIds(ruta: com.rumbo.nucleo.ruta.Ruta, pisoId: String): List<List<String>> =
+        ruta.tramosDelPiso(pisoId).map { tramo ->
+            tramo.map { posicion ->
+                ruta.puntos.first { it.pisoId == pisoId && it.posicion == posicion }.nodoId
+            }
+        }
 }

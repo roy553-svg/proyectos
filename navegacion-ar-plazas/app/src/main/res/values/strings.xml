@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_nombre">Rumbo</string>
+    <string name="lema">Elige un lugar y síguelo en el mundo real</string>
+    <string name="encuentra_tu_lugar">Encuentra tu lugar</string>
+    <string name="selecciona_plaza">Selecciona una plaza</string>
+    <string name="a_donde_quieres_ir">¿A dónde quieres ir?</string>
+    <string name="destino">Destino</string>
+    <string name="comenzar_navegacion">Comenzar navegación</string>
+    <string name="ver_mapa">Ver mapa</string>
+    <string name="salir">Salir</string>
+    <string name="has_llegado">Has llegado</string>
+    <string name="te_has_desviado">Te has desviado</string>
+    <string name="permiso_camara_titulo">Necesitamos la cámara</string>
+    <string name="permiso_camara_texto">La cámara solo se usa durante la navegación AR y para leer los códigos QR de la plaza. No se guarda ninguna imagen.</string>
+</resources>
