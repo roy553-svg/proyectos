@@ -1,0 +1,14 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Configuracion local y base de datos de desarrollo
+.env
+*.db
+*.sqlite3
