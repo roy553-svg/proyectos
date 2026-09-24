@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Periodico plegado: rectangulo con lineas de texto y un pliegue. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#F2E8D5"
+        android:pathData="M30,32h44a2,2 0 0 1 2,2v42a2,2 0 0 1 -2,2h-44a2,2 0 0 1 -2,-2v-42a2,2 0 0 1 2,-2z" />
+    <path
+        android:fillColor="#EADFC8"
+        android:pathData="M74,40h6a2,2 0 0 1 2,2v34a2,2 0 0 1 -2,2h-6z" />
+    <path
+        android:fillColor="#8C2B1F"
+        android:pathData="M34,38h36v6h-36z" />
+    <path
+        android:fillColor="#5A4B3A"
+        android:pathData="M34,50h16v4h-16zM34,58h16v4h-16zM34,66h16v4h-16zM54,50h16v20h-16z" />
+</vector>

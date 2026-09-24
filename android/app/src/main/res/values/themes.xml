@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- El color real lo aplica Compose (ProfetaTheme); este tema solo evita
+         el parpadeo blanco antes del primer frame. -->
+    <style name="Theme.ElProfeta" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#F2E8D5</item>
+        <item name="android:statusBarColor">#2B2118</item>
+    </style>
+</resources>

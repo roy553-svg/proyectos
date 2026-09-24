@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">El Profeta</string>
+    <string name="masthead">El Profeta</string>
+    <string name="masthead_subtitle">Edición semanal del mundo mágico</string>
+    <string name="loading">Revelando la edición…</string>
+    <string name="retry">Reintentar</string>
+    <string name="error_generic">No se ha podido cargar la edición.</string>
+    <string name="error_no_edition">Todavía no hay una edición publicada esta semana.</string>
+    <string name="error_unknown_user">Este lector no tiene preferencias registradas.</string>
+    <string name="offline_notice">Sin conexión: mostrando la última edición descargada.</string>
+    <string name="video_processing">La animación de esta noticia aún se está revelando.</string>
+    <string name="read_more">Leer la noticia completa</string>
+    <string name="back">Volver a la portada</string>
+    <string name="article_image">Imagen de la noticia</string>
+    <string name="source_prefix">Fuente:</string>
+</resources>
