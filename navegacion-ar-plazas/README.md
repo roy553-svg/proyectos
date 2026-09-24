@@ -62,6 +62,57 @@ falta de soporte AR.
 > El módulo `:nucleo`, que contiene toda la lógica de navegación, sí está compilado
 > y con sus 40 pruebas pasando.
 
+## Qué falta para que la app esté funcionando
+
+### 1. Compilar y ver correr (necesita una máquina con Android SDK)
+
+```bash
+cd navegacion-ar-plazas
+./gradlew :nucleo:test          # esto ya funciona en cualquier máquina con JDK 17+
+./gradlew :app:assembleDebug    # esto necesita el SDK y acceso a dl.google.com
+./gradlew :app:installDebug
+```
+
+Al abrir el proyecto en Android Studio se genera `local.properties` con la ruta del
+SDK y se descargan AGP, Compose, ARCore, CameraX y ML Kit. Puede hacer falta algún
+ajuste menor en la primera compilación (imports sin usar, alguna versión del
+catálogo `gradle/libs.versions.toml`). Antes de compilar, este cedazo rápido
+detecta desajustes sin SDK:
+
+```bash
+python3 herramientas/verificar_kotlin.py
+```
+
+Para probar el recorrido completo **sin imprimir nada**: en la pantalla
+"¿Dónde estás?" pulsa *No tengo los QR impresos* y elige uno de los 6 puntos de
+Plaza Aurora; equivale a haber escaneado esa etiqueta.
+
+### 2. Calibrar con el teléfono en la mano
+
+Valores que se eligieron con criterio pero que solo se afinan midiendo en un
+pasillo real:
+
+- radios de llegada (2,5 m a un nodo, 4 m al destino) y umbral de desvío (7 m),
+  en `ConfigNavegacion`;
+- longitud de zancada del modo sin AR (0,70 m), en `ProveedorPoseSensores`;
+- el azimut del modo brújula: comprobar el signo contra una brújula real antes de
+  confiar en él (el modo AR no depende de esto);
+- tamaño de la flecha en pantallas pequeñas.
+
+### 3. Usarlo en una plaza de verdad
+
+- Levantar el mapa real con el editor (medidas **en metros**) o cargarlo por JSON.
+- Medir el rumbo de cada punto QR, imprimir las etiquetas y pegarlas.
+- Validar antes de pisar la plaza: copiar `PlazaAuroraTest` apuntando al mapa nuevo.
+
+### 4. Fuera del alcance de este MVP (a propósito)
+
+Búsqueda por texto y favoritos; backend y sincronización de mapas (hoy el
+almacenamiento es local); importar/exportar JSON desde la UI; balizas BLE para
+eliminar la deriva; detección automática de piso; pruebas instrumentadas de UI y
+CI; accesibilidad con TalkBack e idiomas adicionales; firma de release y ProGuard
+afinado; icono definitivo de marca.
+
 ## Estructura
 
 ```
