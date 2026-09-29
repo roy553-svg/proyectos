@@ -102,6 +102,9 @@ auténticos.
 
 ## 3. El guion de la demo, paso a paso
 
+Resumen; el guion completo, con tiempos, clics y respuestas a las objeciones
+habituales, está en [`GUION-DEMO.md`](GUION-DEMO.md).
+
 Cinco minutos delante de un comité:
 
 1. **Abra la interfaz como *Banco Beta*, pestaña *Privacidad de sub-transacción*,
@@ -372,6 +375,7 @@ canton-banking-poc/
 │   ├── levantar-red.sh            Arranca la red local
 │   ├── ejecutar-demo.sh           Opera sobre la red real y verifica
 │   └── verificar-privacidad.py    Interroga los 4 nodos y emite veredicto
+├── GUION-DEMO.md                  Guion de presentacion y objeciones frecuentes
 └── frontend/                      Interfaz ejecutiva React + TypeScript + Tailwind
     └── src/
         ├── lib/escenario.ts       Escenario con informees derivados del modelo
